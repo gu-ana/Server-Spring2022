@@ -18,6 +18,7 @@ void Session::start()
                   boost::asio::placeholders::bytes_transferred));
 }
 
+//handle method is called after read is complete.
 void Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
 {
@@ -34,6 +35,7 @@ void Session::handle_read(const boost::system::error_code& error,
   }
 }
 
+//similarly, handle_write is called after a write has completed.
 void Session::handle_write(const boost::system::error_code& error)
 {
   if (!error)
