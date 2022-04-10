@@ -1,0 +1,3 @@
+server name;
+listen 8080;
+foo bar;

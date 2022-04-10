@@ -1,0 +1,7 @@
+foo barbar;
+
+server {
+  setup {
+    listen 8080;
+  }
+}

@@ -41,8 +41,18 @@ find_package(Threads REQUIRED)
 add_library(server_lib src/server.cc)
 add_library(session_lib src/session.cc)
 add_library(header_handler_lib src/header_handler.cc)
+add_library(config_parser_lib src/config_parser.cc)
 
 #Updated executable name, srcs, and deps
 add_executable(server src/server_main.cc)
-target_link_libraries(server server_lib session_lib header_handler_lib Boost::system Threads::Threads)
+add_executable(config_parser src/config_parser_main.cc)
+target_link_libraries(server server_lib session_lib header_handler_lib config_parser_lib Boost::system Threads::Threads)
+target_link_libraries(config_parser config_parser_lib)
+
+# Update test executable name, srcs, and deps
+add_executable(config_parser_test tests/config_parser_test.cc)
+target_link_libraries(config_parser_test config_parser_lib gtest_main gmock_main)
+
+# Update with test binary
+gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 

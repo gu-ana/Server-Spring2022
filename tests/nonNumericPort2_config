@@ -1,0 +1,4 @@
+foo bar;
+Server {
+  listen Eighty;
+}
