@@ -40,8 +40,9 @@ find_package(Threads REQUIRED)
 # add libraries
 add_library(server_lib src/server.cc)
 add_library(session_lib src/session.cc)
+add_library(header_handler_lib src/header_handler.cc)
 
 #Updated executable name, srcs, and deps
 add_executable(server src/server_main.cc)
-target_link_libraries(server server_lib session_lib Boost::system Threads::Threads)
+target_link_libraries(server server_lib session_lib header_handler_lib Boost::system Threads::Threads)
 
