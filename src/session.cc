@@ -1,13 +1,18 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/beast/http.hpp>
 #include <iostream>
 #include <string>
+
+namespace http = boost::beast::http;
 
 
 #include "session.h"
 
 Session::Session(boost::asio::io_service& io_service): socket_(io_service) {
-  // Header_Handler head_handler;
+  // setting http response
+  http::response<http::string_body> httpResponse_;
+  httpResponse_.version(11);
 }
 
 tcp::socket& Session::socket()
@@ -29,18 +34,20 @@ void Session::handle_read(const boost::system::error_code& error,
 {
   if (!error)
   {
-    Header_Handler head_handler;
-    // vector of const_buffers, use to combine header and data buffers.
-    std::vector<boost::asio::const_buffer> buffers;
-    //use the header_handler class to get the OK header and length
-    buffers.push_back(boost::asio::buffer(head_handler.okHeader, head_handler.okHeader.length()));
-    //must also push back using bytes_transferred or else the buffer will increase in size
-    buffers.push_back(boost::asio::buffer(data_, bytes_transferred));
+    // setting response header
+    httpResponse_.result(http::status::ok);
+    httpResponse_.set(http::field::content_type, "text/plain");
+    
+    // converts data to C++ string
+    // sets body of response to data
+    std::string str(data_, bytes_transferred);
+    httpResponse_.body() = str;
 
-    // then echo back the formed response to the client...
-    boost::asio::async_write(socket_, buffers,
-                              boost::bind(&Session::handle_write, this,
-                              boost::asio::placeholders::error));
+    // sets length of data
+    httpResponse_.prepare_payload();
+
+    http::async_write(socket_, httpResponse_, boost::bind(&Session::handle_write, this,
+                               boost::asio::placeholders::error));
   }
   else
   {

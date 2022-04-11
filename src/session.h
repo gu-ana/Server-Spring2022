@@ -1,8 +1,9 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include "header_handler.h"
+#include <boost/beast/http.hpp>
 
 using boost::asio::ip::tcp;
+namespace http = boost::beast::http;
 
 class Session {
     public:
@@ -16,7 +17,7 @@ class Session {
         void handle_write(const boost::system::error_code& error);
         //vars
         tcp::socket socket_;
-	Header_Handler head_handler;
+        http::response<http::string_body> httpResponse_;
         enum { max_length = 1024 };
         char data_[max_length];
 };
