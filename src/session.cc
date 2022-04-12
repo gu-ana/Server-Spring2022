@@ -34,6 +34,7 @@ void Session::handle_read(const boost::system::error_code& error,
 {
   if (!error)
   {
+    // code source: https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/using_http/message_containers.html
     // setting response header
     httpResponse_.result(http::status::ok);
     httpResponse_.set(http::field::content_type, "text/plain");
