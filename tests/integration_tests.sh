@@ -11,6 +11,14 @@ function run_setup() {
 	echo "building server..."
 	make server &>/dev/null
 	cd ../tests
+
+	# generate local server config
+	touch local_test_config
+	echo "listen ${LOCAL_PORT_NUM};" >> local_test_config
+}
+
+function run_cleanup() {
+	rm local_test_config
 }
 
 # start local server as background process
@@ -68,6 +76,9 @@ do
 		echo "FAILED"
 	fi
 done
+
+# clean up test artifacts
+run_cleanup
 
 # report how many tests passed
 echo "${passed} of ${num_tests} tests passed"
