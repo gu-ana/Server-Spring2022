@@ -1,5 +1,8 @@
 #include "gtest/gtest.h"
 #include "config_parser.h"
+#include <string>
+
+using ::testing::MatchesRegex;
 
 class NginxConfigParserTest : public ::testing::Test {
   protected:
@@ -73,6 +76,10 @@ TEST_F(NginxConfigParserTest, doubleEscape) {
   EXPECT_TRUE(success);
 }
 
+TEST_F(NginxConfigParserTest, ConfigWithComment) {
+    bool success = parser.Parse("comment_config", &out_config);
+    EXPECT_TRUE(success);
+}
 
 // Testing port number test cases
 TEST_F(NginxConfigParserTest, negativePort) {
@@ -124,4 +131,24 @@ TEST_F(NginxConfigParserTest, nonNumericPort2) {
   EXPECT_TRUE(success);
   int port = out_config.getPort();
   EXPECT_EQ(port, -1);
+}
+
+
+// Test ToString for NginxConfig
+TEST_F(NginxConfigParserTest, configToString) {
+    bool success = parser.Parse("string_config", &out_config);
+    EXPECT_TRUE(success);
+    std::string config_string = out_config.ToString(0);
+    std::string expect_string = "listen 80;\nfoo bar;\n";
+    EXPECT_STREQ(config_string.c_str(), expect_string.c_str());
+}
+
+// ToString with child blocks
+TEST_F(NginxConfigParserTest, blockConfigToString) {
+    bool success = parser.Parse("blockstring_config", &out_config);
+    EXPECT_TRUE(success);
+    std::string config_string = out_config.ToString(0);
+    std::cerr << config_string;
+    std::string expect_string = "listen 80;\nfoo bar;\nServer {\n  host 1;\n}\n";
+    EXPECT_STREQ(config_string.c_str(), expect_string.c_str());
 }
