@@ -71,4 +71,3 @@ void Session::handle_write(const boost::system::error_code& error)
     delete this;
   }
 }
-

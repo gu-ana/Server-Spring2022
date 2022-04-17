@@ -1,0 +1,5 @@
+listen 80;
+foo bar;
+Server {
+    host 1;
+}
