@@ -25,6 +25,7 @@ function run_cleanup() {
 function start_local_server() {
 	../build/bin/server local_test_config &>/dev/null &
 	local_server_pid=$!
+	sleep 1
 }
 
 # testing functions
