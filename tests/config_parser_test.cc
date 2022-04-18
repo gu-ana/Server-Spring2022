@@ -2,8 +2,6 @@
 #include "config_parser.h"
 #include <string>
 
-using ::testing::MatchesRegex;
-
 class NginxConfigParserTest : public ::testing::Test {
   protected:
     NginxConfigParser parser;
