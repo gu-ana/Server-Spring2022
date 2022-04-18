@@ -1,9 +1,5 @@
 HTTP/1.1 200 OK
 Content-Type: text/plain
-Content-Length: 78
+Content-Length: 11
 
-GET / HTTP/1.1
-Host: 35.203.165.222
-User-Agent: curl/7.68.0
-Accept: */*
-
+gcp test 1

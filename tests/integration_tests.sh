@@ -2,7 +2,7 @@
 # code source: https://linuxhint.com/bash-set-e/
 GCP_IP=35.203.165.222
 GCP_PORT_NUM=80
-LOCAL_PORT_NUM=8080
+LOCAL_PORT_NUM=8000
 
 # setup
 function run_setup() {
@@ -29,33 +29,24 @@ function start_local_server() {
 }
 
 # testing functions
-function local_response_header_test() {
-	start_local_server
-	curl -s -S -I http://localhost:${LOCAL_PORT_NUM} -o /tmp/actual
-	kill ${local_server_pid}
-	diff expected_local_header /tmp/actual
-}
-
 function local_full_response_test() {
 	start_local_server
-	curl -s -S -i http://localhost:${LOCAL_PORT_NUM} -o /tmp/actual
-	kill ${local_server_pid}
+	echo "local test 1" | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	sleep 1
+	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff expected_local_full /tmp/actual
 }
 
-function gcp_response_header_test() {
-	curl -s -S -I ${GCP_IP}:${PORT_NUM} -o /tmp/actual
-	diff expected_gcp_header /tmp/actual
-}
-
 function gcp_full_response_test() {
-	curl -s -S -i ${GCP_IP}:${PORT_NUM} -o /tmp/actual
+	echo "gcp test 1" | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
+	nc_pid=$!
+	sleep 1
+	kill ${nc_pid}
 	diff expected_gcp_full /tmp/actual
 }
 
 # to add new tests, add name below
-test_list=(local_response_header local_full_response
-	gcp_response_header gcp_full_response)
+test_list=(local_full_response gcp_full_response)
 
 # run setup commands
 run_setup
