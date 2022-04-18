@@ -20,6 +20,27 @@ tcp::socket& Session::socket()
   return socket_;
 }
 
+int Session::handle_http(char * data, size_t bytes_transferred) 
+{
+  // code source: https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/using_http/message_containers.html
+  // setting response header
+  httpResponse_.result(http::status::ok);
+  httpResponse_.set(http::field::content_type, "text/plain");
+    
+  // converts data to C++ string
+  // sets body of response to data
+  std::string str(data, bytes_transferred);
+  httpResponse_.body() = str;
+
+  // sets length of data
+  httpResponse_.prepare_payload();
+  return 1;
+}
+
+http::response<http::string_body> Session::gethttpResponse() {
+  return httpResponse_;
+}
+
 void Session::start()
 {
   socket_.async_read_some(boost::asio::buffer(data_, max_length),
@@ -33,7 +54,8 @@ void Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
 {
   if (!error)
-  {
+  { 
+    /*
     // code source: https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/using_http/message_containers.html
     // setting response header
     httpResponse_.result(http::status::ok);
@@ -46,7 +68,8 @@ void Session::handle_read(const boost::system::error_code& error,
 
     // sets length of data
     httpResponse_.prepare_payload();
-
+    */
+    handle_http(data_, bytes_transferred);
     http::async_write(socket_, httpResponse_, boost::bind(&Session::handle_write, this,
                                boost::asio::placeholders::error));
   }

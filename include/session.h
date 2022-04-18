@@ -10,6 +10,8 @@ class Session {
         //functions
         Session(boost::asio::io_service& io_service);
         void start();
+	int handle_http(char * data, size_t bytes_transferred);
+	http::response<http::string_body> gethttpResponse();
         tcp::socket& socket();
     private:
         //functions
