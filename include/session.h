@@ -13,10 +13,11 @@ class Session {
 	int handle_http(char * data, size_t bytes_transferred);
 	http::response<http::string_body> gethttpResponse();
         tcp::socket& socket();
-    private:
+    
         //functions
-        void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
-        void handle_write(const boost::system::error_code& error);
+        int handle_read(const boost::system::error_code& error, size_t bytes_transferred);
+        int handle_write(const boost::system::error_code& error);
+    private:
         //vars
         tcp::socket socket_;
         http::response<http::string_body> httpResponse_;

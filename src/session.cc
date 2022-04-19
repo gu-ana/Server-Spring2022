@@ -50,7 +50,7 @@ void Session::start()
 }
 
 //handle method is called after read is complete.
-void Session::handle_read(const boost::system::error_code& error,
+int Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
 {
   if (!error)
@@ -77,10 +77,11 @@ void Session::handle_read(const boost::system::error_code& error,
   {
     delete this;
   }
+  return 0;
 }
 
 //similarly, handle_write is called after a write has completed.
-void Session::handle_write(const boost::system::error_code& error)
+int Session::handle_write(const boost::system::error_code& error)
 {
   if (!error)
   {
@@ -93,4 +94,5 @@ void Session::handle_write(const boost::system::error_code& error)
   {
     delete this;
   }
+  return 0;
 }
