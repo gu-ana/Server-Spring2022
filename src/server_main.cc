@@ -11,12 +11,22 @@
 
 
 #include <iostream>
+#include <csignal>
 
 #include "server.h"
 #include "config_parser.h"
 
+void signalHandler(int signum) 
+{
+   std::cout << "Server was interrupted...shutting down\n";
+   // any future clean up logic goes here
+   exit(signum);  
+}
+
 int main(int argc, char* argv[])
 {
+  signal(SIGINT, signalHandler);  
+
   try
   {
     if (argc != 2)
