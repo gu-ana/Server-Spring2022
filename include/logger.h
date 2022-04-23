@@ -1,3 +1,6 @@
+#ifndef LOGGER_H
+#define LOGGER_H
+
 #include <boost/log/expressions.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/trivial.hpp>
@@ -23,9 +26,33 @@ enum severity_level {
     fatal
 };
 
+// code source: https://www.boost.org/doc/libs/1_54_0/libs/log/doc/html/log/detailed/expressions.html
+// The operator is used for regular stream formatting
+inline std::ostream& operator<< (std::ostream& strm, severity_level level)
+{
+    static const char* strings[] =
+    {
+        "trace",
+        "debug",
+        "info",
+        "warning",
+        "error",
+        "fatal"
+    };
+
+    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
+        strm << strings[level];
+    else
+        strm << static_cast< int >(level);
+
+    return strm;
+}
+
 class Logger {
     public:
         static void initLogger();
         static boost::log::sources::severity_logger<severity_level> getLogger();
         static boost::log::sources::severity_logger<severity_level> logger_;
 };
+
+#endif

@@ -21,11 +21,11 @@ void signalHandler(int signum)
 {
   if (signum == SIGTERM)
   {
-    LOG(info) << "Server was aborted...shutting down\n";
+    LOG(info) << "Server was aborted...shutting down\n\n";
   }
   else
   {
-    LOG(fatal) << "Server was interrupted...shutting down\n";
+    LOG(fatal) << "Server was interrupted...shutting down\n\n";
   }
 
    // any future clean up logic goes here
@@ -36,6 +36,7 @@ void signalHandler(int signum)
 int main(int argc, char* argv[])
 {
   signal(SIGINT, signalHandler);
+  signal(SIGTERM, signalHandler);
 
   try
   {
