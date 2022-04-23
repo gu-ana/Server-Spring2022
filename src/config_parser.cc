@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "config_parser.h"
+#include "logger.h"
 
 // helper function to check if input string are valid integer
 bool is_digits(const std::string &str)
@@ -46,13 +47,13 @@ int NginxConfig::getPort() {
     if (statement->child_block_.get() == nullptr) {
       if (statement->tokens_.size() == 2 && statement->tokens_[0] == "listen") {
 	if (!is_digits(statement->tokens_[1].c_str())) {
-	  std::cerr << "Specified port number contained non-numeric values.\n";
+	  LOG(error) << "  " << "Specified port number contained non-numeric values.\n";
 	  return -1;
 	}
         port = atoi(statement->tokens_[1].c_str());
         if (port >= 0 && port <= 65535) return port; //valid port num
 	else {
-	  std::cerr << "Specified port number not in valid range [0-65535].\n";
+	  LOG(error) << "  " << "Specified port number not in valid range [0-65535].\n";
 	  return -1;
 	}	
       }
@@ -231,7 +232,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   while (true) {
     std::string token;
     token_type = ParseToken(config_file, &token);
-    printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
+    LOG(info) << "  " << TokenTypeAsString(token_type) << ": " << token.c_str();
     if (token_type == TOKEN_TYPE_ERROR) {
       break;
     }
@@ -297,9 +298,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     last_token_type = token_type;
   }
 
-  printf ("Bad transition from %s to %s\n",
-          TokenTypeAsString(last_token_type),
-          TokenTypeAsString(token_type));
+  LOG(error) << "  " << "Bad transition from " << TokenTypeAsString(last_token_type) << "to" << TokenTypeAsString(token_type);
   return false;
 }
 
@@ -307,7 +306,7 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
   config_file.open(file_name);
   if (!config_file.good()) {
-    printf ("Failed to open config file: %s\n", file_name);
+    LOG(error) << "  " << "Failed to open config file: " << file_name;
     return false;
   }
 

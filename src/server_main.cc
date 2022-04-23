@@ -15,34 +15,47 @@
 
 #include "server.h"
 #include "config_parser.h"
+#include "logger.h"
 
-void signalHandler(int signum) 
+void signalHandler(int signum)
 {
-   std::cout << "Server was interrupted...shutting down\n";
+  if (signum == SIGTERM)
+  {
+    LOG(info) << "Server was aborted...shutting down\n";
+  }
+  else
+  {
+    LOG(fatal) << "Server was interrupted...shutting down\n";
+  }
+
    // any future clean up logic goes here
-   exit(signum);  
+
+   exit(signum);
 }
 
 int main(int argc, char* argv[])
 {
-  signal(SIGINT, signalHandler);  
+  signal(SIGINT, signalHandler);
 
   try
   {
+    Logger::initLogger();
+
     if (argc != 2)
     {
-      std::cerr << "Usage: async_tcp_echo_server <config_file>\n";
+      LOG(error) << "Usage: async_tcp_echo_server <config_file>\n";
       return 1;
     }
     NginxConfigParser parser;
     NginxConfig config;
+    LOG(info) << "Parsing server config...";
     if (!parser.Parse(argv[1], &config)) {
-      std::cerr << "Config file not able to be parsed.\n";
+      LOG(error) << "Config file not able to be parsed.\n";
       return 1;
     }
     int port = config.getPort();
     if (port < 0) {
-      std::cerr << "Unable to find valid Port from config file.\n";
+      LOG(error) << "Unable to find valid Port from config file.\n";
       return 1;
     }
 
@@ -54,7 +67,7 @@ int main(int argc, char* argv[])
   }
   catch (std::exception& e)
   {
-    std::cerr << "Exception: " << e.what() << "\n";
+    LOG(fatal) << "Exception: " << e.what() << "\n";
   }
 
   return 0;

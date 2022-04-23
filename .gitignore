@@ -3,3 +3,5 @@
 build
 build_*
 mirror
+logs
+tests/log
