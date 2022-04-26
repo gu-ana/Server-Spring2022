@@ -14,6 +14,8 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <map>
+
 
 #include "config_parser.h"
 #include "logger.h"
@@ -69,6 +71,41 @@ int NginxConfig::getPort() {
   return -1;  
 }
 
+std::map<std::string, std::string> NginxConfig::getRoot() {
+  return map_;
+}
+
+
+void NginxConfig::extractRoot() 
+{
+  std::string root = "/";
+  for (const auto& statement : statements_) 
+  {
+    {
+      if(statement->tokens_[0] == "server") 
+      {
+        if(statement->child_block_.get() != nullptr) 
+        {
+          for(const auto& block_line : statement->child_block_->statements_) 
+          {
+            if(block_line->tokens_[0] != "location") 
+            {
+              continue;
+            }
+            if(block_line->child_block_.get() != nullptr &&
+               block_line->child_block_->statements_.size() == 1 &&
+               block_line->child_block_->statements_[0]->tokens_[0] == "root")
+              {
+                map_.insert({block_line->tokens_[1], block_line->child_block_->statements_[0]->tokens_[1]});
+              }
+          }
+        }
+      }
+    }
+    
+  }
+  return; 
+}
 
 std::string NginxConfigStatement::ToString(int depth) {
   std::string serialized_statement;

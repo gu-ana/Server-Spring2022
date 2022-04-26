@@ -1,0 +1,17 @@
+
+server {
+  listen   8080;
+  server_name foo.com;
+  root /home/ubuntu/sites/foo/;
+
+  location /static/help/ {
+    root /files/images;
+  }
+  location /static/ {
+    root /files;
+  }
+  location /static2/ {
+    root /files/www;
+  }
+  
+}

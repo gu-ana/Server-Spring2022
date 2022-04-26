@@ -6,39 +6,16 @@
 
 namespace http = boost::beast::http;
 
-
+#include "logger.h"
+#include "request_handler.h"
 #include "session.h"
 
-Session::Session(boost::asio::io_service& io_service): socket_(io_service) {
-  // setting http response
-  http::response<http::string_body> httpResponse_;
-  httpResponse_.version(11);
+Session::Session(boost::asio::io_service& io_service, NginxConfig* config): socket_(io_service), config_(config) {
 }
 
 tcp::socket& Session::socket()
 {
   return socket_;
-}
-
-int Session::handle_http(char * data, size_t bytes_transferred) 
-{
-  // code source: https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/using_http/message_containers.html
-  // setting response header
-  httpResponse_.result(http::status::ok);
-  httpResponse_.set(http::field::content_type, "text/plain");
-    
-  // converts data to C++ string
-  // sets body of response to data
-  std::string str(data, bytes_transferred);
-  httpResponse_.body() = str;
-
-  // sets length of data
-  httpResponse_.prepare_payload();
-  return 1;
-}
-
-http::response<http::string_body> Session::gethttpResponse() {
-  return httpResponse_;
 }
 
 void Session::start()
@@ -49,29 +26,62 @@ void Session::start()
                   boost::asio::placeholders::bytes_transferred));
 }
 
+std::string get_target(std::string httpRequestString) 
+{
+  http::request_parser<http::string_body> req_parser;
+    req_parser.eager(true);
+
+    boost::system::error_code ec;
+    req_parser.put(boost::asio::buffer(httpRequestString), ec);
+    if(ec) 
+    {
+        LOG(severity_level::error) << "Unable to parse request string error code:" << ec.message() << '\n' ; 
+        return "";
+    }
+    return std::string(req_parser.get().target()).c_str();
+}
 //handle method is called after read is complete.
 int Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
 {
   if (!error)
   { 
-    /*
-    // code source: https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/using_http/message_containers.html
-    // setting response header
-    httpResponse_.result(http::status::ok);
-    httpResponse_.set(http::field::content_type, "text/plain");
-    
-    // converts data to C++ string
-    // sets body of response to data
-    std::string str(data_, bytes_transferred);
-    httpResponse_.body() = str;
 
-    // sets length of data
-    httpResponse_.prepare_payload();
-    */
-    handle_http(data_, bytes_transferred);
+    std::string str(data_, bytes_transferred);
+    httpResponse_ = {};
+    std::string target = get_target(data_);
+    RequestHandler* handler;
+    if(target == "/echo/" || target == "/echo" ) 
+    {
+      handler = new EchoHandler;
+      LOG(info) << "Echo request received \n";
+    }
+    else 
+    {
+      handler = new StaticHandler;
+      LOG(info) << "Static request received \n";
+      ((StaticHandler*) handler)->set_map(config_->getRoot());
+    }
+
+    if(!handler->format_request(data_)) 
+    {
+      LOG(severity_level::error) << "Unable to format request \n";
+      httpResponse_.version(11);
+      httpResponse_.result(http::status::ok);
+      httpResponse_.set(http::field::content_type, "text/plain");
+      httpResponse_.body() = "Bad Format \n";
+      httpResponse_.prepare_payload();
+    }
+    else 
+    {
+      handler->handle_request(httpResponse_);
+    }
+
     http::async_write(socket_, httpResponse_, boost::bind(&Session::handle_write, this,
-                               boost::asio::placeholders::error));
+                                boost::asio::placeholders::error));
+    LOG(info) << "HTTP response sent to client \n";
+    memset(data_, 0, 1024);
+    delete handler;
   }
   else
   {

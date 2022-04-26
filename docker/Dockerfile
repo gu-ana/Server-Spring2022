@@ -21,7 +21,10 @@ COPY --from=builder /usr/src/project/build/bin/server .
 
 COPY --from=builder /usr/src/project/server_config .
 
+COPY --from=builder /usr/src/project/files .
+
 # Expose some port(s)
+EXPOSE 8080
 EXPOSE 80
 
 # Use ENTRYPOINT to specify the binary name

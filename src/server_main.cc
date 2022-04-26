@@ -11,6 +11,8 @@
 
 
 #include <iostream>
+#include <map>
+
 #include <csignal>
 
 #include "server.h"
@@ -60,9 +62,11 @@ int main(int argc, char* argv[])
       return 1;
     }
 
+    config.extractRoot();
+
     boost::asio::io_service io_service;
 
-    Server s(io_service, port);
+    Server s(io_service, port, &config);
 
     io_service.run();
   }

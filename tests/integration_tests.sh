@@ -31,7 +31,7 @@ function start_local_server() {
 # testing functions
 function local_full_response_test() {
 	start_local_server
-	echo "local test 1" | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	printf 'GET /static/help/index.html HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff expected_local_full /tmp/actual
@@ -46,8 +46,7 @@ function gcp_full_response_test() {
 }
 
 # to add new tests, add name below
-test_list=(local_full_response gcp_full_response)
-
+# test_list=(local_full_response gcp_full_response)
 # run setup commands
 run_setup
 

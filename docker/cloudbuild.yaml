@@ -27,7 +27,7 @@ steps:
   args: [
     'build',
     '-f', 'docker/coverage.Dockerfile',
-    '-t', 'gcr.io/$PROJECT_ID/swan:latest',
+    '-t', 'gcr.io/$PROJECT_ID/swan:coverage',
     '.'
   ]
-images: ['gcr.io/$PROJECT_ID/swan:base', 'gcr.io/$PROJECT_ID/swan:latest']
+images: ['gcr.io/$PROJECT_ID/swan:base', 'gcr.io/$PROJECT_ID/swan:latest', 'gcr.io/$PROJECT_ID/swan:coverage']
