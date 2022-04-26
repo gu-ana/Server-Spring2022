@@ -96,6 +96,11 @@ void NginxConfig::extractRoot()
                block_line->child_block_->statements_.size() == 1 &&
                block_line->child_block_->statements_[0]->tokens_[0] == "root")
               {
+                // given the following config
+                // location /static/ {
+                //  root /files;
+                // }
+                // maps location such as "/static/" to path specified by root "/files"
                 map_.insert({block_line->tokens_[1], block_line->child_block_->statements_[0]->tokens_[1]});
               }
           }

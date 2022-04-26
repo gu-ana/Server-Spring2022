@@ -13,9 +13,9 @@ bool RequestHandler::format_request(std::string request_string)
 
     boost::system::error_code ec;
     req_parser.put(boost::asio::buffer(request_string), ec);
-    if(ec) 
+    if(ec)
     {
-        LOG(severity_level::error) << "Could not parse request string" << ec.message() << "\n";
+        LOG(severity_level::error) << "Could not parse request string: " << ec.message() << "\n";
         return false;
     }
     httpRequestString_ = request_string;
@@ -23,14 +23,11 @@ bool RequestHandler::format_request(std::string request_string)
     return true;
 }
 
-
-int StaticHandler::handle_request(http::response<http::string_body>& httpResponse) 
+std::string StaticHandler::longest_prefix_match(std::map<std::string, std::string> map, std::string target)
 {
-    std::string target = std::string(httpRequest_.target()).c_str();
-    LOG(info) << "Client requested " << target << '\n';
     std::string uri = target;
     size_t max_match_size = 0;
-    for(const auto& root: map_) 
+    for(const auto& root: map) 
     {
         std::size_t found = target.find(root.first);
         if (found != std::string::npos) 
@@ -42,8 +39,16 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
             }
         }
     }
+    return uri;
 
+}
+int StaticHandler::handle_request(http::response<http::string_body>& httpResponse) 
+{
+    std::string target = std::string(httpRequest_.target()).c_str();
+    LOG(info) << "Client requested " << target << '\n';
+    std::string uri = longest_prefix_match(map_, target);
     LOG(info) << "Server remap target " << uri << '\n';
+    
     uri.replace(0, 1, "../");
     boost::filesystem::path target_path(uri);
     std::ifstream f(target_path.c_str(), std::ios::in | std::ios::binary);
@@ -98,11 +103,6 @@ int EchoHandler::handle_request(http::response<http::string_body>& httpResponse)
     httpResponse.prepare_payload();
 
     return 0;
-}
-
-http::response<http::string_body> RequestHandler::get_response()
-{
-    return httpResponse_;
 }
 
 void StaticHandler::set_map(std::map<std::string, std::string> map)

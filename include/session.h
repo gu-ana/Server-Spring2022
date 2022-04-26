@@ -5,11 +5,13 @@
 #include <boost/asio.hpp>
 #include <boost/beast/http.hpp>
 
-
 #include "config_parser.h"
+#include "logger.h"
+#include "request_handler.h"
 using boost::asio::ip::tcp;
 namespace http = boost::beast::http;
 
+std::string get_target(std::string httpRequestString);
 
 class Session {
     public:
@@ -19,6 +21,8 @@ class Session {
         tcp::socket& socket();
     
         //functions
+        http::response<http::string_body> getHttpResponse();
+        void handle_http(std::string target, char* data, RequestHandler* handler);
         int handle_read(const boost::system::error_code& error, size_t bytes_transferred);
         int handle_write(const boost::system::error_code& error);
     private:

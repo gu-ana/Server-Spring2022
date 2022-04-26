@@ -1,6 +1,8 @@
+#include <string>
+#include <map>
+
 #include "gtest/gtest.h"
 #include "config_parser.h"
-#include <string>
 
 class NginxConfigParserTest : public ::testing::Test {
   protected:
@@ -129,6 +131,19 @@ TEST_F(NginxConfigParserTest, nonNumericPort2) {
   EXPECT_TRUE(success);
   int port = out_config.getPort();
   EXPECT_EQ(port, -1);
+}
+
+// test static file mapping
+TEST_F(NginxConfigParserTest, mapLocation) {
+  bool success = parser.Parse("weird_8080_max_match_config", &out_config);
+  EXPECT_TRUE(success);
+  out_config.extractRoot();
+  std::map<std::string, std::string> map = out_config.getRoot();
+  std::map<std::string, std::string> expected;
+  expected.insert({"/static/help/", "/files/images"});
+  expected.insert({"/static/", "/files"});
+  expected.insert({"/static2/", "/files/www"});
+  EXPECT_EQ(map, expected);
 }
 
 

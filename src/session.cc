@@ -6,9 +6,22 @@
 
 namespace http = boost::beast::http;
 
-#include "logger.h"
-#include "request_handler.h"
 #include "session.h"
+
+std::string get_target(std::string httpRequestString) 
+{
+  http::request_parser<http::string_body> req_parser;
+    req_parser.eager(true);
+
+    boost::system::error_code ec;
+    req_parser.put(boost::asio::buffer(httpRequestString), ec);
+    if(ec) 
+    {
+        LOG(severity_level::error) << "Unable to parse request string error code:" << ec.message() << '\n' ; 
+        return "";
+    }
+    return std::string(req_parser.get().target()).c_str();
+}
 
 Session::Session(boost::asio::io_service& io_service, NginxConfig* config): socket_(io_service), config_(config) {
 }
@@ -26,31 +39,13 @@ void Session::start()
                   boost::asio::placeholders::bytes_transferred));
 }
 
-std::string get_target(std::string httpRequestString) 
+http::response<http::string_body> Session::getHttpResponse()
 {
-  http::request_parser<http::string_body> req_parser;
-    req_parser.eager(true);
-
-    boost::system::error_code ec;
-    req_parser.put(boost::asio::buffer(httpRequestString), ec);
-    if(ec) 
-    {
-        LOG(severity_level::error) << "Unable to parse request string error code:" << ec.message() << '\n' ; 
-        return "";
-    }
-    return std::string(req_parser.get().target()).c_str();
+  return httpResponse_;
 }
-//handle method is called after read is complete.
-int Session::handle_read(const boost::system::error_code& error,
-    size_t bytes_transferred)
-{
-  if (!error)
-  { 
 
-    std::string str(data_, bytes_transferred);
-    httpResponse_ = {};
-    std::string target = get_target(data_);
-    RequestHandler* handler = nullptr;
+void Session::handle_http(std::string target, char* data, RequestHandler* handler)
+{
     if(target == "/echo/" || target == "/echo" ) 
     {
       handler = new EchoHandler;
@@ -71,7 +66,7 @@ int Session::handle_read(const boost::system::error_code& error,
       httpResponse_.prepare_payload();
       LOG(info) << "HTTP response 400: Received bad request target \n";
     }
-    else if(!handler->format_request(data_)) 
+    else if(!handler->format_request(data)) 
     {
       LOG(severity_level::error) << "Unable to format request \n";
       httpResponse_.version(11);
@@ -84,6 +79,18 @@ int Session::handle_read(const boost::system::error_code& error,
     {
       handler->handle_request(httpResponse_);
     }
+}
+
+//handle method is called after read is complete.
+int Session::handle_read(const boost::system::error_code& error,
+    size_t bytes_transferred)
+{
+  if (!error)
+  {
+    httpResponse_ = {};
+    std::string target = get_target(data_);
+    RequestHandler* handler = nullptr;
+    handle_http(target, data_, handler);
 
     http::async_write(socket_, httpResponse_, boost::bind(&Session::handle_write, this,
                                 boost::asio::placeholders::error));

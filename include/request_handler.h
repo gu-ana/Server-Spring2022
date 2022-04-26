@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/beast/http.hpp>
 #include <string>
+#include <map>
 
 
 using boost::asio::ip::tcp;
@@ -16,7 +17,6 @@ class RequestHandler {
     public:
         bool format_request(std::string request_string);
         virtual int handle_request(http::response<http::string_body>& httpResponse) = 0;
-        http::response<http::string_body> get_response();
         
     //protected because we want the derived classes to have access
     protected:
@@ -28,6 +28,7 @@ class RequestHandler {
 class StaticHandler: public RequestHandler {
     public:
         void set_map(std::map<std::string, std::string> map);
+        std::string longest_prefix_match(std::map<std::string, std::string> map, std::string target);
         int handle_request(http::response<http::string_body>& httpResponse);
     private:
         std::map<std::string, std::string> map_;
