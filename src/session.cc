@@ -50,20 +50,28 @@ int Session::handle_read(const boost::system::error_code& error,
     std::string str(data_, bytes_transferred);
     httpResponse_ = {};
     std::string target = get_target(data_);
-    RequestHandler* handler;
+    RequestHandler* handler = nullptr;
     if(target == "/echo/" || target == "/echo" ) 
     {
       handler = new EchoHandler;
-      LOG(info) << "Echo request received \n";
+      LOG(info) << "Echo request received from " << socket_.remote_endpoint() << "\n";
     }
-    else 
+    else if (target.find("/static") != std::string::npos )
     {
       handler = new StaticHandler;
-      LOG(info) << "Static request received \n";
+      LOG(info) << "Static request received from " << socket_.remote_endpoint() << "\n";
       ((StaticHandler*) handler)->set_map(config_->getRoot());
     }
 
-    if(!handler->format_request(data_)) 
+    if(handler == nullptr) {
+      httpResponse_.version(11);
+      httpResponse_.result(http::status::bad_request);
+      httpResponse_.set(http::field::content_type, "text/plain");
+      httpResponse_.body() = "Bad Request \n";
+      httpResponse_.prepare_payload();
+      LOG(info) << "HTTP response 400: Received bad request target \n";
+    }
+    else if(!handler->format_request(data_)) 
     {
       LOG(severity_level::error) << "Unable to format request \n";
       httpResponse_.version(11);
@@ -79,9 +87,12 @@ int Session::handle_read(const boost::system::error_code& error,
 
     http::async_write(socket_, httpResponse_, boost::bind(&Session::handle_write, this,
                                 boost::asio::placeholders::error));
-    LOG(info) << "HTTP response sent to client \n";
+    LOG(info) << "HTTP response sent to client at " << socket_.remote_endpoint()  << "\n";
     memset(data_, 0, 1024);
-    delete handler;
+    if(handler != nullptr) {
+      delete handler;
+    }
+    
   }
   else
   {

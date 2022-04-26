@@ -1,3 +1,14 @@
 server {
-	listen 80;
+  listen   80;
+
+  location /static/help/ {
+    root /files/images;
+  }
+  location /static/ {
+    root /files;
+  }
+  location /static2/ {
+    root /files/www;
+  }
+  
 }

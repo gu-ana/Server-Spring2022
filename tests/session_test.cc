@@ -1,13 +1,15 @@
 #include "gtest/gtest.h"
 #include <string>
 #include "session.h"
+#include "config_parser.h"
 
-// class SessionTest : public ::testing::Test {
-//   protected:
-//     boost::asio::io_service io_service;
-//     Session session = Session(io_service);
-//     boost::system::error_code ec;
-// };
+class SessionTest : public ::testing::Test {
+  protected:
+    boost::asio::io_service io_service;
+    NginxConfig* config;
+    Session session = Session(io_service, config);
+    boost::system::error_code ec;
+};
 
 // TEST_F(SessionTest, httpBody) {
 //   char test_data[] = "http test body data.\n";

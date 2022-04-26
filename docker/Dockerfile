@@ -21,7 +21,7 @@ COPY --from=builder /usr/src/project/build/bin/server .
 
 COPY --from=builder /usr/src/project/server_config .
 
-COPY --from=builder /usr/src/project/files .
+COPY --from=builder /usr/src/project/files ./files
 
 # Expose some port(s)
 EXPOSE 8080
