@@ -51,8 +51,8 @@ inline std::ostream& operator<< (std::ostream& strm, severity_level level)
 class Logger {
     public:
         static void initLogger();
-        static boost::log::sources::severity_logger<severity_level> getLogger();
-        static boost::log::sources::severity_logger<severity_level> logger_;
+        static boost::log::sources::severity_logger_mt<severity_level> getLogger();
+        static boost::log::sources::severity_logger_mt<severity_level> logger_;
 };
 
 #endif

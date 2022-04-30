@@ -1,6 +1,6 @@
 #include "logger.h"
 
-boost::log::sources::severity_logger<severity_level> Logger::logger_;
+boost::log::sources::severity_logger_mt<severity_level> Logger::logger_;
 
 void Logger::initLogger() 
 {    
@@ -27,7 +27,7 @@ void Logger::initLogger()
     boost::log::add_common_attributes();
 }
 
-boost::log::sources::severity_logger<severity_level> Logger::getLogger() 
+boost::log::sources::severity_logger_mt<severity_level> Logger::getLogger() 
 {
     return logger_;
 }
