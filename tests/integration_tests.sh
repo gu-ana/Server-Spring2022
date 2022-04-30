@@ -54,7 +54,7 @@ function local_bad_request_test()
 	printf 'GET /echmo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_bad_format /tmp/actual
+	diff expected_bad_request /tmp/actual
 }
 
 function local_file_not_found_test()

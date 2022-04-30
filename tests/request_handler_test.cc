@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 #include "request_handler.h"
+#include "echo_handler.h"
+#include "static_handler.h"
 
 class RequestHandlerTest : public ::testing::Test
 {
@@ -31,7 +33,7 @@ class StaticHandlerTest : public RequestHandlerTest
 TEST_F(EchoHandlerTest, CorrectFormat)
 {
 	char correct[] = "GET /echo HTTP/1.1\r\n\r\n";
-	bool success = echo_handler.format_request(correct);
+	bool success = echo_handler.set_request(correct);
 	EXPECT_TRUE(success);
 
 	int retVal = echo_handler.handle_request(httpResponse);
@@ -43,21 +45,21 @@ TEST_F(EchoHandlerTest, CorrectFormat)
 // test bad echo
 TEST_F(EchoHandlerTest, BadFormat)
 {
-	bool fail = echo_handler.format_request(wrong);
+	bool fail = echo_handler.set_request(wrong);
 	EXPECT_FALSE(fail);
 }
 
 // test correct static
 TEST_F(StaticHandlerTest, CorrectFormat)
 {
-	bool success = static_handler.format_request(correct);
+	bool success = static_handler.set_request(correct);
 	EXPECT_TRUE(success);
 }
 
 // test bad static
 TEST_F(StaticHandlerTest, BadFormat)
 {
-	bool fail = static_handler.format_request(wrong);
+	bool fail = static_handler.set_request(wrong);
 	EXPECT_FALSE(fail);
 }
 
@@ -79,7 +81,7 @@ TEST_F(StaticHandlerTest, ValidTxt)
 	map_.insert({"/static/", "/files"});
 	static_handler.set_map(map_);
 
-	static_handler.format_request(correct);
+	static_handler.set_request(correct);
 	int retVal = static_handler.handle_request(httpResponse);
 	EXPECT_EQ(retVal, 0);
 	EXPECT_EQ(httpResponse.result_int(), 200);
@@ -91,7 +93,7 @@ TEST_F(StaticHandlerTest, ValidPng)
 	map_.insert({"/static/help/", "/files/images"});
 	static_handler.set_map(map_);
 
-	static_handler.format_request(correct_png);
+	static_handler.set_request(correct_png);
 	int retVal = static_handler.handle_request(httpResponse);
 	EXPECT_EQ(retVal, 0);
 	EXPECT_EQ(httpResponse.result_int(), 200);
@@ -103,7 +105,7 @@ TEST_F(StaticHandlerTest, FileNotFound)
 	map_.insert({"/static/help/", "/files/images"});
 	static_handler.set_map(map_);
 
-	static_handler.format_request(does_not_exist);
+	static_handler.set_request(does_not_exist);
 	int retVal = static_handler.handle_request(httpResponse);
 	EXPECT_EQ(retVal, 2);
 	EXPECT_EQ(httpResponse.result_int(), 404);
@@ -116,7 +118,7 @@ TEST_F(StaticHandlerTest, FileNotFound)
 // 	map_.insert({"/static/", "/files"});
 // 	static_handler.set_map(map_);
 
-// 	static_handler.format_request("GET /static/no_permission.txt HTTP/1.1\r\n\r\n");
+// 	static_handler.set_request("GET /static/no_permission.txt HTTP/1.1\r\n\r\n");
 // 	int retVal = static_handler.handle_request(httpResponse);
 // 	EXPECT_EQ(retVal, 2);
 // 	EXPECT_EQ(httpResponse.result_int(), 404);

@@ -7,15 +7,12 @@
 #include <string>
 #include <map>
 
-
 using boost::asio::ip::tcp;
 namespace http = boost::beast::http;
 
-
-
 class RequestHandler {
     public:
-        bool format_request(std::string request_string);
+        bool set_request(std::string request_string);
         virtual int handle_request(http::response<http::string_body>& httpResponse) = 0;
         
     //protected because we want the derived classes to have access
@@ -25,18 +22,4 @@ class RequestHandler {
         http::response<http::string_body> httpResponse_;
 };
 
-class StaticHandler: public RequestHandler {
-    public:
-        void set_map(std::map<std::string, std::string> map);
-        std::string longest_prefix_match(std::map<std::string, std::string> map, std::string target);
-        int handle_request(http::response<http::string_body>& httpResponse);
-    private:
-        std::map<std::string, std::string> map_;
-};
-
-class EchoHandler: public RequestHandler {
-    public:
-        int handle_request(http::response<http::string_body>& httpResponse);
-    
-};
 #endif
