@@ -1,11 +1,12 @@
 #!/bin/bash
 # code source: https://linuxhint.com/bash-set-e/
-GCP_IP=35.203.165.222
-GCP_PORT_NUM=80
+# GCP_IP=35.203.165.222
+# GCP_PORT_NUM=80
 LOCAL_PORT_NUM=8000
 
 # setup
-function run_setup() {
+function run_setup()
+{
 	# enter build directory to make server
 	cd ../build
 	echo "building server..."
@@ -22,12 +23,14 @@ function run_setup() {
 	echo "}" >> local_test_config
 }
 
-function run_cleanup() {
+function run_cleanup()
+{
 	rm local_test_config
 }
 
 # start local server as background process
-function start_local_server() {
+function start_local_server()
+{
 	../build/bin/server local_test_config &>/dev/null &
 	local_server_pid=$!
 	sleep 1
@@ -36,7 +39,8 @@ function start_local_server() {
 # testing functions
 
 # local server tests
-function local_echo_test() {
+function local_echo_test()
+{
 	start_local_server
 	printf 'GET /echo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -44,7 +48,8 @@ function local_echo_test() {
 	diff expected_echo /tmp/actual
 }
 
-function local_bad_request_test() {
+function local_bad_request_test()
+{
 	start_local_server
 	printf 'GET /echmo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -52,7 +57,8 @@ function local_bad_request_test() {
 	diff expected_bad_format /tmp/actual
 }
 
-function local_file_not_found_test() {
+function local_file_not_found_test()
+{
 	start_local_server
 	printf 'GET /static/help/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -60,7 +66,8 @@ function local_file_not_found_test() {
 	diff expected_not_found /tmp/actual
 }
 
-function local_static_txt_test() {
+function local_static_txt_test()
+{
 	start_local_server
 	printf 'GET /static/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -68,7 +75,8 @@ function local_static_txt_test() {
 	diff expected_txt /tmp/actual
 }
 
-function local_static_html_test() {
+function local_static_html_test()
+{
 	start_local_server
 	printf 'GET /static/index.html HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -76,7 +84,8 @@ function local_static_html_test() {
 	diff expected_html /tmp/actual
 }
 
-function local_static_zip_test() {
+function local_static_zip_test()
+{
 	start_local_server
 	printf 'GET /static2/empty.zip HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -84,7 +93,8 @@ function local_static_zip_test() {
 	diff expected_zip /tmp/actual
 }
 
-function local_static_jpg_test() {
+function local_static_jpg_test()
+{
 	start_local_server
 	printf 'GET /static/help/nyan_cat.jpg HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -92,7 +102,8 @@ function local_static_jpg_test() {
 	diff expected_jpg /tmp/actual
 }
 
-function local_static_png_test() {
+function local_static_png_test()
+{
 	start_local_server
 	printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
@@ -100,79 +111,11 @@ function local_static_png_test() {
 	diff expected_png /tmp/actual
 }
 
-
-# gcp server tests
-function gcp_echo_test() {
-	printf 'GET /echo HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_echo /tmp/actual
-}
-
-function gcp_bad_request_test() {
-	printf 'GET /echmo HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_bad_format /tmp/actual
-}
-
-function gcp_file_not_found_test() {
-	printf 'GET /static/help/file1.txt HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_not_found /tmp/actual
-}
-
-function gcp_static_txt_test() {
-	printf 'GET /static/file1.txt HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_txt /tmp/actual
-}
-
-function gcp_static_html_test() {
-	printf 'GET /static/index.html HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_html /tmp/actual
-}
-
-function gcp_static_zip_test() {
-	printf 'GET /static2/empty.zip HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_zip /tmp/actual
-}
-
-function gcp_static_jpg_test() {
-	printf 'GET /static/help/nyan_cat.jpg HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_jpg /tmp/actual
-}
-
-function gcp_static_png_test() {
-	printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc ${GCP_IP} ${GCP_PORT_NUM} > /tmp/actual &
-	nc_pid=$!
-	sleep 1
-	kill ${nc_pid}
-	diff expected_png /tmp/actual
-}
-
 # to add new tests, add name below
 test_list=(local_echo local_bad_request local_file_not_found
 	local_static_txt local_static_html local_static_zip
-	local_static_jpg local_static_png
-	gcp_echo gcp_bad_request gcp_file_not_found
-	gcp_static_txt gcp_static_html gcp_static_zip
-	gcp_static_jpg gcp_static_png)
+	local_static_jpg local_static_png)
+
 # run setup commands
 run_setup
 

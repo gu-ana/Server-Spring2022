@@ -4,7 +4,8 @@
 #include "gtest/gtest.h"
 #include "config_parser.h"
 
-class NginxConfigParserTest : public ::testing::Test {
+class NginxConfigParserTest : public ::testing::Test
+{
   protected:
     NginxConfigParser parser;
     NginxConfig out_config;	
@@ -12,91 +13,107 @@ class NginxConfigParserTest : public ::testing::Test {
 
 
 // SimpleConfig testcase
-TEST_F(NginxConfigParserTest, SimpleConfig) {
+TEST_F(NginxConfigParserTest, SimpleConfig)
+{
   bool success = parser.Parse("example_config", &out_config);
   EXPECT_TRUE(success);
 }
 
-TEST_F(NginxConfigParserTest, TokensConfig) {
+TEST_F(NginxConfigParserTest, TokensConfig)
+{
   bool success = parser.Parse("tokens_config", &out_config);
   EXPECT_TRUE(success);
 }
 
 // Syntax checks
-TEST_F(NginxConfigParserTest, BadSyntax1) {
+TEST_F(NginxConfigParserTest, BadSyntax1)
+{
   bool success = parser.Parse("syntax1_config", &out_config);
   EXPECT_FALSE(success);
 }
 
-TEST_F(NginxConfigParserTest, BadSyntax2) {
+TEST_F(NginxConfigParserTest, BadSyntax2)
+{
   bool success = parser.Parse("syntax2_config", &out_config);
   EXPECT_FALSE(success);
 }
 
-TEST_F(NginxConfigParserTest, BadSyntax3) {
+TEST_F(NginxConfigParserTest, BadSyntax3)
+{
   bool success = parser.Parse("syntax3_config", &out_config);
   EXPECT_FALSE(success);
 }
 
-TEST_F(NginxConfigParserTest, BadSyntax4) {
+TEST_F(NginxConfigParserTest, BadSyntax4)
+{
   bool success = parser.Parse("syntax4_config", &out_config);
   EXPECT_FALSE(success);
 }
 
-TEST_F(NginxConfigParserTest, BadSyntax5) {
+TEST_F(NginxConfigParserTest, BadSyntax5)
+{
   bool success = parser.Parse("syntax5_config", &out_config);
   EXPECT_FALSE(success);
 }
 
 // Empty config file should return true
-TEST_F(NginxConfigParserTest, EmptyConfig) {
+TEST_F(NginxConfigParserTest, EmptyConfig)
+{
   bool success = parser.Parse("empty_config", &out_config);
   EXPECT_TRUE(success);
 }
 
 // Empty block should work with grammar
-TEST_F(NginxConfigParserTest, EmptyBlock) {
+TEST_F(NginxConfigParserTest, EmptyBlock)
+{
   bool success = parser.Parse("emptyblock_config", &out_config);
   EXPECT_TRUE(success);
 }
 
 
-TEST_F(NginxConfigParserTest, Whitespace) {
+TEST_F(NginxConfigParserTest, Whitespace)
+{
   bool success = parser.Parse("whitespace_config", &out_config);
   EXPECT_FALSE(success);
 }
 
-TEST_F(NginxConfigParserTest, singleEscape) {
+TEST_F(NginxConfigParserTest, singleEscape)
+{
   bool success = parser.Parse("singleEscape_config", &out_config);
   EXPECT_TRUE(success);
 }
 
-TEST_F(NginxConfigParserTest, doubleEscape) {
+TEST_F(NginxConfigParserTest, doubleEscape)
+{
   bool success = parser.Parse("doubleEscape_config", &out_config);
   EXPECT_TRUE(success);
 }
 
-TEST_F(NginxConfigParserTest, ConfigWithComment) {
+TEST_F(NginxConfigParserTest, ConfigWithComment)
+{
     bool success = parser.Parse("comment_config", &out_config);
     EXPECT_TRUE(success);
 }
 
 // Testing port number test cases
-TEST_F(NginxConfigParserTest, negativePort) {
+TEST_F(NginxConfigParserTest, negativePort)
+{
   bool success = parser.Parse("negativePort_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
   EXPECT_EQ(port, -1);
 }
 
-TEST_F(NginxConfigParserTest, reservedPort) {
+TEST_F(NginxConfigParserTest, reservedPort)
+{
   bool success = parser.Parse("reservedPort_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
   EXPECT_EQ(port, 80);
 }
 
-TEST_F(NginxConfigParserTest, largePosPort) {
+TEST_F(NginxConfigParserTest, largePosPort)
+{
   bool success = parser.Parse("largePosPort_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
@@ -104,7 +121,8 @@ TEST_F(NginxConfigParserTest, largePosPort) {
 }
 
 // when port is simple listen statement
-TEST_F(NginxConfigParserTest, validStatementPort) {
+TEST_F(NginxConfigParserTest, validStatementPort)
+{
   bool success = parser.Parse("validStatementPort_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
@@ -112,21 +130,24 @@ TEST_F(NginxConfigParserTest, validStatementPort) {
 }
 
 //when port is nested in block
-TEST_F(NginxConfigParserTest, validBlockPort) {
+TEST_F(NginxConfigParserTest, validBlockPort)
+{
   bool success = parser.Parse("validBlockPort_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
   EXPECT_EQ(port, 8080);
 }
 
-TEST_F(NginxConfigParserTest, nonNumericPort1) {
+TEST_F(NginxConfigParserTest, nonNumericPort1)
+{
   bool success = parser.Parse("nonNumericPort1_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
   EXPECT_EQ(port, -1);
 }
 
-TEST_F(NginxConfigParserTest, nonNumericPort2) {
+TEST_F(NginxConfigParserTest, nonNumericPort2)
+{
   bool success = parser.Parse("nonNumericPort2_config", &out_config);
   EXPECT_TRUE(success);
   int port = out_config.getPort();
@@ -134,7 +155,8 @@ TEST_F(NginxConfigParserTest, nonNumericPort2) {
 }
 
 // test static file mapping
-TEST_F(NginxConfigParserTest, mapLocation) {
+TEST_F(NginxConfigParserTest, mapLocation)
+{
   bool success = parser.Parse("weird_8080_max_match_config", &out_config);
   EXPECT_TRUE(success);
   out_config.extractRoot();
@@ -148,7 +170,8 @@ TEST_F(NginxConfigParserTest, mapLocation) {
 
 
 // Test ToString for NginxConfig
-TEST_F(NginxConfigParserTest, configToString) {
+TEST_F(NginxConfigParserTest, configToString)
+{
     bool success = parser.Parse("string_config", &out_config);
     EXPECT_TRUE(success);
     std::string config_string = out_config.ToString(0);
@@ -157,7 +180,8 @@ TEST_F(NginxConfigParserTest, configToString) {
 }
 
 // ToString with child blocks
-TEST_F(NginxConfigParserTest, blockConfigToString) {
+TEST_F(NginxConfigParserTest, blockConfigToString)
+{
     bool success = parser.Parse("blockstring_config", &out_config);
     EXPECT_TRUE(success);
     std::string config_string = out_config.ToString(0);

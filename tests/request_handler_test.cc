@@ -4,18 +4,21 @@
 #include "gtest/gtest.h"
 #include "request_handler.h"
 
-class RequestHandlerTest : public ::testing::Test {
+class RequestHandlerTest : public ::testing::Test
+{
   protected:
   	char wrong[5] = "blah";
   	http::response<http::string_body> httpResponse;
 };
 
-class EchoHandlerTest : public RequestHandlerTest {
+class EchoHandlerTest : public RequestHandlerTest
+{
 	protected:
 		EchoHandler echo_handler;
 };
 
-class StaticHandlerTest : public RequestHandlerTest {
+class StaticHandlerTest : public RequestHandlerTest
+{
 	protected:
 		StaticHandler static_handler;
 		std::map<std::string, std::string> map_;
@@ -25,7 +28,8 @@ class StaticHandlerTest : public RequestHandlerTest {
 };
 
 // test correct echo
-TEST_F(EchoHandlerTest, CorrectFormat) {
+TEST_F(EchoHandlerTest, CorrectFormat)
+{
 	char correct[] = "GET /echo HTTP/1.1\r\n\r\n";
 	bool success = echo_handler.format_request(correct);
 	EXPECT_TRUE(success);
@@ -37,25 +41,29 @@ TEST_F(EchoHandlerTest, CorrectFormat) {
 }
 
 // test bad echo
-TEST_F(EchoHandlerTest, BadFormat) {
+TEST_F(EchoHandlerTest, BadFormat)
+{
 	bool fail = echo_handler.format_request(wrong);
 	EXPECT_FALSE(fail);
 }
 
 // test correct static
-TEST_F(StaticHandlerTest, CorrectFormat) {
+TEST_F(StaticHandlerTest, CorrectFormat)
+{
 	bool success = static_handler.format_request(correct);
 	EXPECT_TRUE(success);
 }
 
 // test bad static
-TEST_F(StaticHandlerTest, BadFormat) {
+TEST_F(StaticHandlerTest, BadFormat)
+{
 	bool fail = static_handler.format_request(wrong);
 	EXPECT_FALSE(fail);
 }
 
 // test longest prefix matching
-TEST_F(StaticHandlerTest, PrefixMatching) {
+TEST_F(StaticHandlerTest, PrefixMatching)
+{
 	map_.insert({"/static/", "/files"});
 	std::string target = static_handler.longest_prefix_match(map_, "/static/help/hutao.jpg");
 	EXPECT_EQ(target, "/files/help/hutao.jpg");
@@ -66,7 +74,8 @@ TEST_F(StaticHandlerTest, PrefixMatching) {
 }
 
 // test existing txt file
-TEST_F(StaticHandlerTest, ValidTxt) {
+TEST_F(StaticHandlerTest, ValidTxt)
+{
 	map_.insert({"/static/", "/files"});
 	static_handler.set_map(map_);
 
@@ -77,7 +86,8 @@ TEST_F(StaticHandlerTest, ValidTxt) {
 }
 
 // test existing png file
-TEST_F(StaticHandlerTest, ValidPng) {
+TEST_F(StaticHandlerTest, ValidPng)
+{
 	map_.insert({"/static/help/", "/files/images"});
 	static_handler.set_map(map_);
 
@@ -88,7 +98,8 @@ TEST_F(StaticHandlerTest, ValidPng) {
 }
 
 // test non-existent file with valid format
-TEST_F(StaticHandlerTest, FileNotFound) {
+TEST_F(StaticHandlerTest, FileNotFound)
+{
 	map_.insert({"/static/help/", "/files/images"});
 	static_handler.set_map(map_);
 

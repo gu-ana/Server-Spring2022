@@ -6,7 +6,7 @@
 #include "mime_types.h"
 #include "logger.h"
 
-bool RequestHandler::format_request(std::string request_string) 
+bool RequestHandler::format_request(std::string request_string)
 {
     http::request_parser<http::string_body> req_parser;
     req_parser.eager(true);
@@ -42,7 +42,8 @@ std::string StaticHandler::longest_prefix_match(std::map<std::string, std::strin
     return uri;
 
 }
-int StaticHandler::handle_request(http::response<http::string_body>& httpResponse) 
+
+int StaticHandler::handle_request(http::response<http::string_body>& httpResponse)
 {
     std::string target = std::string(httpRequest_.target()).c_str();
     LOG(info) << "Client requested " << target << '\n';
@@ -52,7 +53,7 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
     uri.replace(0, 1, "../");
     boost::filesystem::path target_path(uri);
     std::ifstream f(target_path.c_str(), std::ios::in | std::ios::binary);
-    if(!boost::filesystem::exists(target_path) || !boost::filesystem::is_regular_file(target_path)) 
+    if(!boost::filesystem::exists(target_path) || !boost::filesystem::is_regular_file(target_path))
     {
         LOG(severity_level::error) << "HTTP Error 404 response created, Could not find target file";
         httpResponse_.version(11);
@@ -62,7 +63,7 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
         httpResponse.prepare_payload();
         return 2;
     }
-    else if (!f) 
+    else if (!f)
     {
         LOG(severity_level::error) << "HTTP Error 404 response created, could not open file \n";
         httpResponse_.version(11);
@@ -72,7 +73,7 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
         httpResponse.prepare_payload();
         return 2;
     }
-    else 
+    else
     {
         std::string extension = target_path.extension().string();   
         std::string body = "";
