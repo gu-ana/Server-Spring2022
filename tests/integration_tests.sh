@@ -3,6 +3,7 @@
 # GCP_IP=35.203.165.222
 # GCP_PORT_NUM=80
 LOCAL_PORT_NUM=8000
+INTEGRATION_TEST_PATH="./integration_testcases"
 
 # setup
 function run_setup()
@@ -45,7 +46,7 @@ function local_echo_test()
 	printf 'GET /echo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_echo /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_echo /tmp/actual
 }
 
 function local_bad_request_test()
@@ -54,7 +55,7 @@ function local_bad_request_test()
 	printf 'GET /echmo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_bad_request /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_bad_request /tmp/actual
 }
 
 function local_file_not_found_test()
@@ -63,7 +64,7 @@ function local_file_not_found_test()
 	printf 'GET /static/help/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_not_found /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_not_found /tmp/actual
 }
 
 function local_static_txt_test()
@@ -72,7 +73,7 @@ function local_static_txt_test()
 	printf 'GET /static/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_txt /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_txt /tmp/actual
 }
 
 function local_static_html_test()
@@ -81,7 +82,7 @@ function local_static_html_test()
 	printf 'GET /static/index.html HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_html /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_html /tmp/actual
 }
 
 function local_static_zip_test()
@@ -90,7 +91,7 @@ function local_static_zip_test()
 	printf 'GET /static2/empty.zip HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_zip /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_zip /tmp/actual
 }
 
 function local_static_jpg_test()
@@ -99,7 +100,7 @@ function local_static_jpg_test()
 	printf 'GET /static/help/nyan_cat.jpg HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_jpg /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_jpg /tmp/actual
 }
 
 function local_static_png_test()
@@ -108,7 +109,7 @@ function local_static_png_test()
 	printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 1
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff expected_png /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
 }
 
 # to add new tests, add name below

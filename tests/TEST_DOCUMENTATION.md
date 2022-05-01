@@ -1,11 +1,9 @@
-# Brief overview of Test Cases checked in this test suite
+# Hierarchy of Test Suite
 
-- One set of test cases is to check basic syntax errors, such as missing 
-TOKEN\_TYPE\_STATEMENT\_END (;), or missing end block tokens (}), or missing
-or mismatching quotation marks.
-- Another test case is to check if the parser correctly allows for multiple 
-tokens in a statement.
-- Another is to check if the parser allows an empty block in the config.
-- Checks if it allows for backslashed escaped characters
-- checks if correct whitespace after a quotation.
-- Last is to check if parser allows for empty config file (it should).
+At top level of ./tests/ we define the unit and integration tests for our code.
+
+Config Parser unit tests have a subdirectory ./tests/parser\_tests dedicated to
+config files used for testing.
+
+Integration tests similarly have a subdirectory ./tests/integration\_testcases
+to hold expected server output files.

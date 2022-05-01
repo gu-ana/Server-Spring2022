@@ -76,8 +76,6 @@ target_link_libraries(request_handler_delegate_test request_handler_delegate_lib
     echo_handler_lib static_handler_lib mime_types_lib logger_lib 
     Boost::log_setup Boost::log Boost::filesystem gtest_main gmock_main)
 
-add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server_lib gtest_main gmock_main)
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
