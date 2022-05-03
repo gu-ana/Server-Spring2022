@@ -8,12 +8,18 @@ class RequestHandlerDelegateTest : public ::testing::Test
     RequestHandlerDelegate delegate;
 	std::map<std::string, std::string> map_;
 	std::string ip = "127.1.0.0";
+
+	void SetUp()
+	{
+		httpResponse = {};
+		map_.insert({"/static/", "/files"});
+		delegate.set_map(map_);
+	}
 };
 
 // test for bad request
 TEST_F(RequestHandlerDelegateTest, BadRequest)
 {
-	httpResponse = {};
 	char incorrect[] = "";
     delegate.processRequest(incorrect, httpResponse, ip);
 	EXPECT_EQ(httpResponse.result_int(), 400);
@@ -23,10 +29,6 @@ TEST_F(RequestHandlerDelegateTest, BadRequest)
 // test for valid static request
 TEST_F(RequestHandlerDelegateTest, ValidStaticRequest)
 {
-	httpResponse = {};
-	map_.insert({"/static/", "/files"});
-	delegate.set_map(map_);
-
 	char correct[] = "GET /static/file1.txt HTTP/1.1\r\n\r\n";
 	delegate.processRequest(correct, httpResponse, ip);
 	EXPECT_EQ(httpResponse.result_int(), 200);
@@ -35,8 +37,6 @@ TEST_F(RequestHandlerDelegateTest, ValidStaticRequest)
 // test for valid static request
 TEST_F(RequestHandlerDelegateTest, ValidEchoRequest)
 {
-	httpResponse = {};
-
 	char correct[] = "GET /echo HTTP/1.1\r\n\r\n";
 	delegate.processRequest(correct, httpResponse, ip);
 	EXPECT_EQ(httpResponse.result_int(), 200);

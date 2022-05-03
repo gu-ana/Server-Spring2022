@@ -19,21 +19,13 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
     if(!boost::filesystem::exists(target_path) || !boost::filesystem::is_regular_file(target_path)) 
     {
         LOG(severity_level::error) << "HTTP Error 404 response created, Could not find target file";
-        httpResponse_.version(11);
-        httpResponse.result(http::status::not_found);
-        httpResponse.set(http::field::content_type, "text/plain");
-        httpResponse.body() = "File not found";
-        httpResponse.prepare_payload();
+        set_response(http::status::not_found, "text/plain", "File not found\n", httpResponse);
         return 2;
     }
     else if (!fileStream) 
     {
         LOG(severity_level::error) << "HTTP Error 404 response created, could not open file \n";
-        httpResponse_.version(11);
-        httpResponse.result(http::status::not_found);
-        httpResponse.set(http::field::content_type, "text/plain");
-        httpResponse.body() = "Cannot Open File";
-        httpResponse.prepare_payload();
+        set_response(http::status::not_found, "text/plain", "Cannot open file\n", httpResponse);
         return 2;
     }
     else 
@@ -47,11 +39,7 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
         }
         fileStream.close();
         LOG(info) << "Requested file parsed successfully \n";
-        httpResponse.version(11);
-        httpResponse.result(http::status::ok);
-        httpResponse.set(http::field::content_type, server::mime_types::extension_to_type(extension)); 
-        httpResponse.body() = body + '\n';
-        httpResponse.prepare_payload();
+        set_response(http::status::ok, server::mime_types::extension_to_type(extension), body + '\n', httpResponse);
         LOG(info) << "HTTP response created successfully \n";
     }
     

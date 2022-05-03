@@ -10,6 +10,8 @@
 using boost::asio::ip::tcp;
 namespace http = boost::beast::http;
 
+void set_response(boost::beast::http::status status, std::string content_type, std::string body, http::response<http::string_body>& httpResponse);
+
 class RequestHandler {
     public:
         bool set_request(std::string request_string);

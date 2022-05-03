@@ -1,5 +1,6 @@
 #include "request_handler_delegate.h"
 #include "logger.h"
+#include "request_handler.h"
 #include "static_handler.h"
 #include "echo_handler.h"
 
@@ -16,15 +17,6 @@ std::string get_target(std::string httpRequestString)
         return "";
     }
     return std::string(req_parser.get().target()).c_str();
-}
-
-void set_response(boost::beast::http::status status, std::string content_type, std::string body, http::response<http::string_body>& httpResponse)
-{
-  httpResponse.version(11);
-  httpResponse.result(status);
-  httpResponse.set(http::field::content_type, content_type);
-  httpResponse.body() = body;
-  httpResponse.prepare_payload();
 }
 
 void RequestHandlerDelegate::processRequest(std::string request_string, http::response<http::string_body>& httpResponse, std::string endpoint)

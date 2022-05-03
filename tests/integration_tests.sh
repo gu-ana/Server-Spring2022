@@ -44,7 +44,7 @@ function local_echo_test()
 {
 	start_local_server
 	printf 'GET /echo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_echo /tmp/actual
 }
@@ -53,7 +53,7 @@ function local_bad_request_test()
 {
 	start_local_server
 	printf 'GET /echmo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_bad_request /tmp/actual
 }
@@ -62,7 +62,7 @@ function local_file_not_found_test()
 {
 	start_local_server
 	printf 'GET /static/help/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_not_found /tmp/actual
 }
@@ -71,7 +71,7 @@ function local_static_txt_test()
 {
 	start_local_server
 	printf 'GET /static/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_txt /tmp/actual
 }
@@ -80,7 +80,7 @@ function local_static_html_test()
 {
 	start_local_server
 	printf 'GET /static/index.html HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_html /tmp/actual
 }
@@ -89,7 +89,7 @@ function local_static_zip_test()
 {
 	start_local_server
 	printf 'GET /static2/empty.zip HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_zip /tmp/actual
 }
@@ -98,7 +98,7 @@ function local_static_jpg_test()
 {
 	start_local_server
 	printf 'GET /static/help/nyan_cat.jpg HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_jpg /tmp/actual
 }
@@ -107,7 +107,7 @@ function local_static_png_test()
 {
 	start_local_server
 	printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 1
+	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
 	diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
 }
