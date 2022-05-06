@@ -10,7 +10,7 @@ namespace http = boost::beast::http;
 
 Session::Session(boost::asio::io_service& io_service, NginxConfig* config): socket_(io_service), config_(config) 
 {
-  requestHandlerDelegate_.set_map(config_->getRoot());
+  requestHandlerDelegate_.set_map(config_->get_filesystem_map());
 }
 
 void Session::start()

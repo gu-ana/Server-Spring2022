@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
-
+#include <boost/filesystem.hpp>
 
 #include "config_parser.h"
 #include "logger.h"
@@ -71,14 +71,14 @@ int NginxConfig::getPort() {
   return -1;  
 }
 
-std::map<std::string, std::string> NginxConfig::getRoot() {
-  return map_;
+std::map<std::string, std::string> NginxConfig::get_filesystem_map() {
+  return filesystem_map_;
 }
 
-
-void NginxConfig::extractRoot() 
+bool NginxConfig::validate_relative_paths()
 {
-  std::string root = "/";
+  bool all_relative_paths = true;
+  
   for (const auto& statement : statements_) 
   {
     {
@@ -93,16 +93,52 @@ void NginxConfig::extractRoot()
               continue;
             }
             if(block_line->child_block_.get() != nullptr &&
-               block_line->child_block_->statements_.size() == 1 &&
                block_line->child_block_->statements_[0]->tokens_[0] == "root")
               {
-                // given the following config
-                // location /static/ {
-                //  root /files;
-                // }
-                // maps location such as "/static/" to path specified by root "/files"
-                map_.insert({block_line->tokens_[1], block_line->child_block_->statements_[0]->tokens_[1]});
+                //check to see that the second token is a relative path
+                //if not, we return and not all paths are relative
+                boost::filesystem::path current_path(block_line->child_block_->statements_[0]->tokens_[1]);
+                if(!current_path.is_relative()) 
+                {
+                  all_relative_paths = false;
+                  return all_relative_paths;
+                }
               }
+          }
+        }
+      }
+    }
+    
+  }
+  return all_relative_paths; 
+}
+
+void NginxConfig::extract_filesystem_map() 
+{
+  for (const auto& statement : statements_) 
+  {
+    {
+      if(statement->tokens_[0] == "server") 
+      {
+        if(statement->child_block_.get() != nullptr) 
+        {
+          for(const auto& block_line : statement->child_block_->statements_) 
+          {
+            if(block_line->tokens_[0] != "location") 
+            {
+              continue;
+            }
+            for(const auto& location_line : block_line->child_block_->statements_)
+            {
+              if(location_line->tokens_[0] == "root")
+              {
+                // location /static/ {
+                //  root ./files;
+                // }
+                // maps location such as "/static/" to path specified by root "./files"
+                filesystem_map_.insert({block_line->tokens_[1], location_line->tokens_[1]});
+              }
+            }
           }
         }
       }
@@ -347,13 +383,20 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
   config_file.open(file_name);
   if (!config_file.good()) {
-    LOG(error) << "  " << "Failed to open config file: " << file_name;
+    LOG(error) << "Failed to open config file: " << file_name;
     return false;
   }
 
   const bool return_value =
       Parse(dynamic_cast<std::istream*>(&config_file), config);
   config_file.close();
+
+  if(!config->validate_relative_paths())
+  {
+    //config contains at least one absolute path
+    LOG(error) << "Config file contains at least one absolute path. All paths must be relative. \n";
+    return false;
+  }
   return return_value;
 }
 

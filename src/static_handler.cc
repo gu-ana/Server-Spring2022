@@ -13,7 +13,8 @@ int StaticHandler::handle_request(http::response<http::string_body>& httpRespons
     std::string uri = longest_prefix_match(map_, target);
     LOG(info) << "Server remap target " << uri << '\n';
     
-    uri.replace(0, 1, "../");
+    uri.replace(0, 1, ".."); // grabbed uri is always "./{file_location}", replacing with "../{file_location}" to get to root
+    LOG(debug) << uri << '\n';
     boost::filesystem::path target_path(uri);
     std::ifstream fileStream(target_path.c_str(), std::ios::in | std::ios::binary);
     if(!boost::filesystem::exists(target_path) || !boost::filesystem::is_regular_file(target_path)) 

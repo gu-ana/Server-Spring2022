@@ -18,9 +18,9 @@ function run_setup()
 	touch local_test_config
 	echo "server {" > local_test_config
 	echo "listen ${LOCAL_PORT_NUM};" >> local_test_config
-	echo "location /static/help { root /files/images; }" >> local_test_config
-	echo "location /static/ { root /files; }" >> local_test_config
-	echo "location /static2/ { root /files/www; }" >> local_test_config
+	echo "location /static/help { root ./files/images; }" >> local_test_config
+	echo "location /static/ { root ./files; }" >> local_test_config
+	echo "location /static2/ { root ./files/www; }" >> local_test_config
 	echo "}" >> local_test_config
 }
 

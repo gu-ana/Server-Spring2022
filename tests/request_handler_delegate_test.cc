@@ -12,7 +12,7 @@ class RequestHandlerDelegateTest : public ::testing::Test
 	void SetUp()
 	{
 		httpResponse = {};
-		map_.insert({"/static/", "/files"});
+		map_.insert({"/static/", "./files"});
 		delegate.set_map(map_);
 	}
 };

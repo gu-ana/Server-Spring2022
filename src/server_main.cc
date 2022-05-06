@@ -62,8 +62,7 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    config.extractRoot();
-
+    config.extract_filesystem_map();
     boost::asio::io_service io_service;
 
     Server s(io_service, port, &config);

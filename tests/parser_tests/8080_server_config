@@ -1,7 +1,10 @@
-server {
-  listen   80;
 
-  location /static/help/ StaticHandler{
+server {
+  listen   8080;
+  server_name foo.com;
+  root /home/ubuntu/sites/foo/;
+
+  location /static/help/ StaticHandler {
     root ./files/images;
   }
   location /static/ StaticHandler {

@@ -157,14 +157,14 @@ TEST_F(NginxConfigParserTest, nonNumericPort2)
 // test static file mapping
 TEST_F(NginxConfigParserTest, mapLocation)
 {
-  bool success = parser.Parse("./parser_tests/weird_8080_max_match_config", &out_config);
+  bool success = parser.Parse("./parser_tests/8080_server_config", &out_config);
   EXPECT_TRUE(success);
-  out_config.extractRoot();
-  std::map<std::string, std::string> map = out_config.getRoot();
+  out_config.extract_filesystem_map();
+  std::map<std::string, std::string> map = out_config.get_filesystem_map();
   std::map<std::string, std::string> expected;
-  expected.insert({"/static/help/", "/files/images"});
-  expected.insert({"/static/", "/files"});
-  expected.insert({"/static2/", "/files/www"});
+  expected.insert({"/static/help/", "./files/images"});
+  expected.insert({"/static/", "./files"});
+  expected.insert({"/static2/", "./files/www"});
   EXPECT_EQ(map, expected);
 }
 

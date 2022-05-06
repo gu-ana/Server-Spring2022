@@ -31,8 +31,8 @@ class StaticHandlerTest : public RequestHandlerTest
 
 		void SetUp()
 		{
-			map_.insert({"/static/", "/files"});
-			map_.insert({"/static/help/", "/files/images"});
+			map_.insert({"/static/", "./files"});
+			map_.insert({"/static/help/", "./files/images"});
 			static_handler.set_map(map_);
 		}
 };
@@ -75,7 +75,7 @@ TEST_F(StaticHandlerTest, BadFormat)
 TEST_F(StaticHandlerTest, PrefixMatching)
 {
 	target = static_handler.longest_prefix_match(map_, "/static/help/hutao.jpg");
-	EXPECT_EQ(target, "/files/images/hutao.jpg");
+	EXPECT_EQ(target, "./files/images/hutao.jpg");
 }
 
 // test existing txt file

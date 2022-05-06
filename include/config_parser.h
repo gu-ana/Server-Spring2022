@@ -24,10 +24,11 @@ class NginxConfig {
   std::string ToString(int depth = 0);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int getPort();
-  std::map<std::string, std::string> getRoot();
-  void extractRoot();
+  std::map<std::string, std::string> get_filesystem_map();
+  void extract_filesystem_map();
+  bool validate_relative_paths();
  private:
-  std::map<std::string, std::string> map_;
+  std::map<std::string, std::string> filesystem_map_;
 };
 
 // The driver that parses a config file and generates an NginxConfig.
