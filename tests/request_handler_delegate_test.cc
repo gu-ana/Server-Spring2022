@@ -26,17 +26,10 @@ TEST_F(RequestHandlerDelegateTest, BadRequest)
 	EXPECT_EQ(httpResponse.body(), "Bad Request\n");
 }
 
-// test for valid static request
-TEST_F(RequestHandlerDelegateTest, ValidStaticRequest)
-{
-	char correct[] = "GET /static/file1.txt HTTP/1.1\r\n\r\n";
-	delegate.processRequest(correct, httpResponse, ip);
-	EXPECT_EQ(httpResponse.result_int(), 200);
-}
-
-// test for valid static request
+// test for valid echo request
 TEST_F(RequestHandlerDelegateTest, ValidEchoRequest)
 {
+	httpResponse = {};
 	char correct[] = "GET /echo HTTP/1.1\r\n\r\n";
 	delegate.processRequest(correct, httpResponse, ip);
 	EXPECT_EQ(httpResponse.result_int(), 200);

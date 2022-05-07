@@ -43,8 +43,8 @@ add_library(session_lib src/session.cc)
 add_library(config_parser_lib src/config_parser.cc)
 add_library(request_handler_delegate_lib src/request_handler_delegate.cc)
 add_library(request_handler_lib src/request_handler.cc)
-add_library(echo_handler_lib src/echo_handler.cc)
-add_library(static_handler_lib src/static_handler.cc)
+add_library(echo_handler_lib src/echo_handler.cc src/request_handler.cc)
+add_library(static_handler_lib src/static_handler.cc src/request_handler.cc)
 add_library(mime_types_lib src/mime_types.cc)
 add_library(logger_lib src/logger.cc)
 
@@ -75,7 +75,6 @@ add_executable(request_handler_delegate_test tests/request_handler_delegate_test
 target_link_libraries(request_handler_delegate_test request_handler_delegate_lib request_handler_lib 
     echo_handler_lib static_handler_lib mime_types_lib logger_lib 
     Boost::log_setup Boost::log Boost::filesystem gtest_main gmock_main)
-
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)

@@ -3,10 +3,10 @@
 
 #include "request_handler.h"
 
-class EchoHandler: public RequestHandler {
+class EchoHandler: public RequestHandler 
+{
     public:
-        int handle_request(http::response<http::string_body>& httpResponse);
-    
+        bool handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse);
 };
 
 #endif

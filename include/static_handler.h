@@ -3,13 +3,14 @@
 
 #include "request_handler.h"
 
-class StaticHandler: public RequestHandler {
+class StaticHandler: public RequestHandler 
+{
     public:
-        int handle_request(http::response<http::string_body>& httpResponse);
-        std::string longest_prefix_match(std::map<std::string, std::string> map, std::string target);
-        void set_map(std::map<std::string, std::string> map);
+        StaticHandler(std::string location, std::string root_file_path);
+        bool handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse);
     private:
-        std::map<std::string, std::string> map_;
+        std::string location_;
+        std::string root_file_path_;
 };
 
 #endif
