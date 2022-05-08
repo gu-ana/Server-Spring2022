@@ -3,16 +3,7 @@
 #include "request_handler.h"
 #include "static_handler.h"
 #include "echo_handler.h"
-
-// TODO @Ana : remove after creating 404 Handler
-void set_response(boost::beast::http::status status, std::string content_type, std::string body, http::response<http::string_body>& httpResponse)
-{
-  httpResponse.version(11);
-  httpResponse.result(status);
-  httpResponse.set(http::field::content_type, content_type);
-  httpResponse.body() = body;
-  httpResponse.prepare_payload();
-}
+#include "error_handler.h"
 
 bool parse_request(std::string httpRequestString, http::request<http::string_body>& httpRequest) 
 {
@@ -32,22 +23,24 @@ bool parse_request(std::string httpRequestString, http::request<http::string_bod
 
 void RequestHandlerDelegate::processRequest(std::string request_string, http::response<http::string_body>& httpResponse, std::string endpoint)
 {
+    RequestHandler* handler = nullptr;
     http::request<http::string_body> httpRequest; 
     if (!parse_request(request_string, httpRequest))
     {
-      set_response(http::status::bad_request, "text/plain", "Bad Request\n", httpResponse);
+      handler = new ErrorHandler;
       LOG(info) << "HTTP response 400: Received bad request target\n";
     }
     
     std::string target = std::string(httpRequest.target()).c_str();
     
-    RequestHandler* handler = nullptr;
-
+    
+    //TODO @Will Make sure that if the target == "/", we  new the handler to ErrorHandler
     if(target == "/echo/" || target == "/echo")
     {
       handler = new EchoHandler;
       LOG(info) << "Echo request received from " << endpoint << "\n";
     }
+    
     // else if (target.find("/static") != std::string::npos)
     // {
     //   handler = new StaticHandler;
@@ -57,7 +50,6 @@ void RequestHandlerDelegate::processRequest(std::string request_string, http::re
 
     if(handler == nullptr)
     {
-      set_response(http::status::bad_request, "text/plain", "Bad Request\n", httpResponse);
       LOG(info) << "HTTP response 400: Received bad request target from " << endpoint << "\n";
     }
     else

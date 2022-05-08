@@ -22,7 +22,7 @@ TEST_F(RequestHandlerDelegateTest, BadRequest)
 {
 	char incorrect[] = "";
     delegate.processRequest(incorrect, httpResponse, ip);
-	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.result_int(), 404);
 	EXPECT_EQ(httpResponse.body(), "Bad Request\n");
 }
 

@@ -44,37 +44,41 @@ add_library(config_parser_lib src/config_parser.cc)
 add_library(request_handler_delegate_lib src/request_handler_delegate.cc)
 add_library(request_handler_lib src/request_handler.cc)
 add_library(echo_handler_lib src/echo_handler.cc src/request_handler.cc)
+add_library(error_handler_lib src/error_handler.cc src/request_handler.cc)
 add_library(static_handler_lib src/static_handler.cc src/request_handler.cc)
 add_library(mime_types_lib src/mime_types.cc)
 add_library(logger_lib src/logger.cc)
+
+# set grouped lists of libraries
+set(test_libs gtest_main gmock_main) 
+set(logger_libs logger_lib Boost::log_setup Boost::log)
+set(handler_libs request_handler_delegate_lib request_handler_lib
+    echo_handler_lib static_handler_lib static_handler_lib 
+    error_handler_lib mime_types_lib)
 
 #Updated executable name, srcs, and deps
 add_executable(server src/server_main.cc)
 target_link_libraries(server server_lib session_lib config_parser_lib 
     logger_lib request_handler_delegate_lib request_handler_lib echo_handler_lib 
-    static_handler_lib mime_types_lib Boost::filesystem Boost::system Threads::Threads Boost::log_setup Boost::log)
+    static_handler_lib error_handler_lib mime_types_lib 
+    Boost::filesystem Boost::system Threads::Threads Boost::log_setup Boost::log)
 
 add_executable(config_parser src/config_parser_main.cc)
-target_link_libraries(config_parser config_parser_lib logger_lib Boost::log_setup Boost::log)
+target_link_libraries(config_parser config_parser_lib ${logger_libs})
 
 # Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser_lib logger_lib gtest_main gmock_main Boost::log_setup Boost::log)
+target_link_libraries(config_parser_test config_parser_lib ${logger_libs} ${test_libs} )
 
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test session_lib request_handler_delegate_lib 
-    request_handler_lib echo_handler_lib static_handler_lib mime_types_lib config_parser_lib 
-    logger_lib Boost::log_setup Boost::log Boost::filesystem gtest_main gmock_main)
+target_link_libraries(session_test session_lib ${handler_libs} config_parser_lib  
+    ${logger_libs} Boost::filesystem ${test_libs})
 
 add_executable(request_handler_test tests/request_handler_test.cc)
-target_link_libraries(request_handler_test request_handler_delegate_lib 
-    request_handler_lib echo_handler_lib static_handler_lib mime_types_lib config_parser_lib logger_lib 
-    Boost::log_setup Boost::log Boost::filesystem gtest_main gmock_main)
+target_link_libraries(request_handler_test ${handler_libs} config_parser_lib ${logger_libs} Boost::filesystem ${test_libs})
 
 add_executable(request_handler_delegate_test tests/request_handler_delegate_test.cc)
-target_link_libraries(request_handler_delegate_test request_handler_delegate_lib request_handler_lib 
-    echo_handler_lib static_handler_lib mime_types_lib logger_lib 
-    Boost::log_setup Boost::log Boost::filesystem gtest_main gmock_main)
+target_link_libraries(request_handler_delegate_test ${handler_libs} ${logger_libs} Boost::filesystem ${test_libs})
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -89,4 +93,8 @@ add_test(NAME IntegrationTests COMMAND integration_tests.sh WORKING_DIRECTORY ${
 
 #Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server server_lib session_lib request_handler_lib config_parser_lib request_handler_delegate_lib TESTS config_parser_test session_test request_handler_test request_handler_delegate_test)
+generate_coverage_report(TARGETS server server_lib session_lib 
+                         request_handler_lib config_parser_lib 
+                         request_handler_delegate_lib 
+                         TESTS config_parser_test session_test 
+                         request_handler_test request_handler_delegate_test)
