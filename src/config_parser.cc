@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <regex>
 #include <boost/filesystem.hpp>
 
 #include "config_parser.h"
@@ -34,6 +35,14 @@ bool is_digits(const std::string &str)
     return true;
 }
 
+//helper function to strip all trailing/extra slashes 
+//appends one slash at the end
+std::string handle_trailing_slashes(std::string token) 
+{
+  token = regex_replace(token, std::regex("(/)+$"), ""); //removes all slashes end of line
+  token += "/";
+  return token;
+}
 
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;
@@ -75,6 +84,7 @@ std::map<std::string, std::string> NginxConfig::get_filesystem_map() {
   return filesystem_map_;
 }
 
+
 bool NginxConfig::validate_relative_paths()
 {
   bool all_relative_paths = true;
@@ -113,6 +123,8 @@ bool NginxConfig::validate_relative_paths()
   return all_relative_paths; 
 }
 
+// token after location we will append a slash if there isnt one
+// if there are too many, keep just 1
 void NginxConfig::extract_filesystem_map() 
 {
   for (const auto& statement : statements_) 
@@ -136,7 +148,8 @@ void NginxConfig::extract_filesystem_map()
                 //  root ./files;
                 // }
                 // maps location such as "/static/" to path specified by root "./files"
-                filesystem_map_.insert({block_line->tokens_[1], location_line->tokens_[1]});
+                std::string location_path = handle_trailing_slashes(block_line->tokens_[1]);
+                filesystem_map_.insert({location_path, location_line->tokens_[1]});
               }
             }
           }
