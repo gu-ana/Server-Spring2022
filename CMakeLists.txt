@@ -48,20 +48,23 @@ add_library(error_handler_lib src/error_handler.cc src/request_handler.cc)
 add_library(static_handler_lib src/static_handler.cc src/request_handler.cc)
 add_library(mime_types_lib src/mime_types.cc)
 add_library(logger_lib src/logger.cc)
+add_library(handler_factory_lib src/request_handler_factory.cc)
+add_library(static_factory_lib src/static_handler_factory.cc src/request_handler.cc src/static_handler.cc src/mime_types.cc)
+add_library(echo_factory_lib src/echo_handler_factory.cc src/request_handler.cc src/echo_handler.cc)
+add_library(error_factory_lib src/error_handler_factory.cc src/request_handler.cc src/error_handler.cc)
 
 # set grouped lists of libraries
 set(test_libs gtest_main gmock_main) 
 set(logger_libs logger_lib Boost::log_setup Boost::log)
-set(handler_libs request_handler_delegate_lib request_handler_lib
+set(handler_libs request_handler_delegate_lib 
     echo_handler_lib static_handler_lib static_handler_lib 
-    error_handler_lib mime_types_lib)
+    error_handler_lib mime_types_lib request_handler_lib)
+set(handler_factory_libs static_factory_lib echo_factory_lib error_factory_lib
+    handler_factory_lib)
 
 #Updated executable name, srcs, and deps
 add_executable(server src/server_main.cc)
-target_link_libraries(server server_lib session_lib config_parser_lib 
-    logger_lib request_handler_delegate_lib request_handler_lib echo_handler_lib 
-    static_handler_lib error_handler_lib mime_types_lib 
-    Boost::filesystem Boost::system Threads::Threads Boost::log_setup Boost::log)
+target_link_libraries(server server_lib session_lib config_parser_lib ${handler_libs} ${logger_libs} ${handler_factory_libs} Boost::filesystem Boost::system Threads::Threads)
 
 add_executable(config_parser src/config_parser_main.cc)
 target_link_libraries(config_parser config_parser_lib ${logger_libs})
@@ -78,7 +81,8 @@ add_executable(request_handler_test tests/request_handler_test.cc)
 target_link_libraries(request_handler_test ${handler_libs} config_parser_lib ${logger_libs} Boost::filesystem ${test_libs})
 
 add_executable(request_handler_delegate_test tests/request_handler_delegate_test.cc)
-target_link_libraries(request_handler_delegate_test ${handler_libs} ${logger_libs} Boost::filesystem ${test_libs})
+target_link_libraries(request_handler_delegate_test ${handler_libs} ${logger_libs} 
+${handler_factory_libs} ${test_libs} Boost::filesystem)
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
