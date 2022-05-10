@@ -12,6 +12,7 @@
 #include "echo_handler.h"
 #include "static_handler.h"
 #include "request_handler_delegate.h"
+#include "request_handler_factory.h"
 
 using boost::asio::ip::tcp;
 namespace http = boost::beast::http;
@@ -21,7 +22,7 @@ std::string get_target(std::string httpRequestString);
 class Session {
     public:
         // functions
-        Session(boost::asio::io_service& io_service, NginxConfig* config);
+        Session(boost::asio::io_service& io_service, std::map<std::string, std::shared_ptr<RequestHandlerFactory>> factory_routes);
         void start();
         tcp::socket& socket();
         std::string getSocketEndpoint();
@@ -32,7 +33,7 @@ class Session {
         tcp::socket socket_;
         http::response<http::string_body> httpResponse_;
         RequestHandlerDelegate requestHandlerDelegate_;
-        NginxConfig* config_;
+        std::map<std::string, std::shared_ptr<RequestHandlerFactory>> factory_routes_;
         enum { max_length = 1024 };
         char data_[max_length];
 };

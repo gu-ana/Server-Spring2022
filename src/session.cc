@@ -7,10 +7,11 @@
 namespace http = boost::beast::http;
 
 #include "session.h"
+#include "request_handler_factory.h"
 
-Session::Session(boost::asio::io_service& io_service, NginxConfig* config): socket_(io_service), config_(config) 
+Session::Session(boost::asio::io_service& io_service, std::map<std::string, std::shared_ptr<RequestHandlerFactory>> factory_routes): socket_(io_service), factory_routes_(factory_routes) 
 {
-  requestHandlerDelegate_.set_map(config_->get_filesystem_map());
+  requestHandlerDelegate_.set_factory_routes(factory_routes_);
 }
 
 void Session::start()

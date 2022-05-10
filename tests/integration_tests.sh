@@ -113,9 +113,9 @@ function local_static_png_test()
 }
 
 # to add new tests, add name below
-test_list=(local_echo) #local_bad_request local_file_not_found
-	#local_static_txt local_static_html local_static_zip
-	#local_static_jpg local_static_png)
+test_list=(local_echo local_bad_request local_file_not_found
+	local_static_txt local_static_html local_static_zip
+	local_static_jpg local_static_png)
 
 # run setup commands
 run_setup
