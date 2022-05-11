@@ -8,4 +8,4 @@ WORKDIR /usr/src/project/build
 
 # Build and test for coverage
 RUN cmake -DCMAKE_BUILD_TYPE=Coverage ..
-RUN make coverage
+RUN make coverage -j 4
