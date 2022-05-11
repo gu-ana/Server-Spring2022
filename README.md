@@ -10,7 +10,31 @@
 
 ## Source Code
 
-<br></br>
+### Diagram 
+
+![Picture](./CS130_diagram.png)
+
+The server creates the map of location prefixes to handler factories, hands it off to session, and then session hands it off to request_handler_delegate. In request_handler_delegate, depending on the longest prefix matched (default to "/"), the respective factory will instantiate the appropriate handler.
+
+### <u>Config file format</u>
+
+Config files specify the port the server will be listening on as well as the mapping from client side uri to server local files. The format can be generalized to:
+
+~~~~
+server {
+  listen  ${PORT_NUMBER};
+
+  location ${clientside_directory_1} StaticHandler {
+    root ${server_local_directory_1};
+  }
+
+  location ${clientside_directory_2} StaticHandler {
+    root ${server_local_directory_2};
+  }
+}
+~~~~
+
+Note that currently in our groups implementation, the location block must be nested within a server block. The listen block currently does not have to be in a server block, and can be overwritten if there are multiple listen statements in the config file. The factory within `server::create_factory_maps()` will new a StaticHandlerFactory for each of the locations specified. 
 
 ## Build
 
@@ -36,8 +60,38 @@ To run just the integration tests, use the following command:
 
 ### <u>Adding Unit Tests</u>
 
+Depending on what part of the server you are testing, you can choose between:
+1. request_handler_delegate_test.cc
+2. session_test.cc
+3. request_handler_test.cc
+4. config_parser_test.cc
+
+To add a test within one of these files, follow the format in each respective file.
+
+If you are creating a new test file, you will need to add an executable within `CMakeLists.txt` and update the `gtest_discover_tests` suite as well as adding your new file to `generate_coverage_report`. Please use the variables in `set()` to reduce clutter and improve readability.
+
 ### <u>Adding Integration Tests</u>
-<br></br>
+
+Firstly, edit `integration_tests.sh` within ./tests/.
+~~~~
+> cd tests/
+> emacs integration_tests.sh
+~~~~
+Create a function with the format:
+~~~~
+function ${function_name_test}() 
+{
+    start_local_server
+	//replace this line with a request to the server 
+    //example:
+    //'GET /echo HTTP/1.1\r\n\r\n'
+	sleep 0.5 //this is crucial, or else the server may not respond in time for test
+	kill ${local_server_pid} #nc process is killed when the server is killed
+	diff ${INTEGRATION_TEST_PATH}/${expected_file_output} /tmp/actual
+}
+~~~~
+Lastly, add your new test to the `test_list` array using the format
+${function_name_test} without the _test.
 
 ## Running the Server
 
@@ -90,6 +144,8 @@ All new Request Handler Factories must:
 For some examples, take a look at `include/static_handler_factory.h`, `src/static_handler_factory.cc`, `include/echo_handler_factory.h`, and `src/echo_handler_factory.cc`.
 
 ### <u>Update Routes Generation in server.cc</u>
+
+Factory maps the prefix of the request uri to the corresponding request handler factory. Each type of factory is created only once in the server. Since all factory classes are new-ed using a `shared_ptr`, the pointer will be deleted at destruction (aka when the server is terminated). `create_factory_maps()` will route a new static factory for each mapping in config_'s filesystem_map_, which is created in config_parser. 
 
 To add the new request handling functionality to the server, the Request Handler Factory needs to be added to the server's factory map (i.e., `routes`). This can be done by adding to the existing `create_factory_map()` method in `src/server.cc`. As mentioned previously, the `routes` map maps request uri prefixes to Request Handler Factory pointers. 
 
