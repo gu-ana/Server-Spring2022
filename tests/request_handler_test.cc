@@ -6,6 +6,7 @@
 #include "echo_handler.h"
 #include "static_handler.h"
 #include "error_handler.h"
+#include "api_handler.h"
 
 class RequestHandlerTest : public ::testing::Test
 {
@@ -36,6 +37,12 @@ class StaticHandlerTest : public RequestHandlerTest
 		httpRequest = {};
 	}
 };
+
+class ApiHandlerTest : public RequestHandlerTest
+{
+	protected:
+		ApiHandler api_handler = ApiHandler("./data_path/");
+}
 
 // helper function to set http::request objects
 bool parse_request(std::string httpRequestString, http::request<http::string_body>& httpRequest) 
@@ -109,5 +116,62 @@ TEST_F(StaticHandlerTest, FileNotFound)
 	EXPECT_EQ(httpResponse.body(), "File not found\n");
 }
 
+// POST finds correct next available ID and returns {"id": <ID>} in the response
+TEST_F(ApiHandlerTest, ApiPOSTReturnID)
+{
+	EXPECT_TRUE(1);
+}
 
+// POST creates a file in the data_path/entity with the correct ID
+TEST_F(ApiHandlerTest, ApiPOSTCreateFile)
+{
+	EXPECT_TRUE(1);
+}
 
+// GET reads file at data_path/entity/id and returns it
+TEST_F(ApiHandlerTest, ApiGETReadFile)
+{
+	EXPECT_TRUE(1);
+}
+
+// GET reads file at data_path/entity/id but file not found
+TEST_F(ApiHandlerTest, ApiGETFileNotFound)
+{
+	EXPECT_TRUE(1);
+}
+
+// PUT body was successfully written to new data_path/entity/id
+TEST_F(ApiHandlerTest, ApiPUTNewFile)
+{
+	EXPECT_TRUE(1);
+}
+
+// PUT body was successfully written to update data_path/entity/id
+TEST_F(ApiHandlerTest, ApiPUTUpdateFile)
+{
+	EXPECT_TRUE(1);
+}
+
+// DELETE removes the file at data_path/entity/id
+TEST_F(ApiHandlerTest, ApiDELETERemoveFile)
+{
+	EXPECT_TRUE(1);
+}
+
+// DELETE returns an error if the file at data_path/entity/id does not exist
+TEST_F(ApiHandlerTest, ApiDELETEFileNotFound)
+{
+	EXPECT_TRUE(1);
+}
+
+// List: GET /api/entity returns json list of valid ids for entity
+TEST_F(ApiHandlerTest, ApiGETList)
+{
+	EXPECT_TRUE(1);
+}
+
+// List: GET /api/entity for invalid entity
+TEST_F(ApiHandlerTest, ApiGETEntityNotFound)
+{
+	EXPECT_TRUE(1);
+}
