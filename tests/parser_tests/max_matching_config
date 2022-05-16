@@ -13,5 +13,7 @@ server {
   location /static2/ StaticHandler {
     root ./files/www;
   }
-  
+  location /api/ ApiHandler {
+    data_path ./mnt;
+  }
 }

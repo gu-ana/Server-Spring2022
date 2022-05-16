@@ -154,20 +154,22 @@ TEST_F(NginxConfigParserTest, nonNumericPort2)
   EXPECT_EQ(port, -1);
 }
 
-// test static file mapping
+// test static file mapping and data path mapping
 TEST_F(NginxConfigParserTest, mapLocation)
 {
   bool success = parser.Parse("./parser_tests/max_matching_config", &out_config);
   EXPECT_TRUE(success);
   out_config.extract_filesystem_map();
-  std::map<std::string, std::string> map = out_config.get_filesystem_map();
-  std::map<std::string, std::string> expected;
-  expected.insert({"/static/help/", "./files/images"});
-  expected.insert({"/static/", "./files"});
-  expected.insert({"/static2/", "./files/www"});
-  EXPECT_EQ(map, expected);
+  std::map<std::string, std::map<std::string, std::string>> map = out_config.get_filesystem_map();
+  std::map<std::string, std::string> expected_static;
+  std::map<std::string, std::string> expected_api;
+  expected_static.insert({"/static/help/", "./files/images"});
+  expected_static.insert({"/static/", "./files"});
+  expected_static.insert({"/static2/", "./files/www"});
+  expected_api.insert({"/api/", "./mnt"});
+  EXPECT_EQ(map["StaticHandler"], expected_static);
+  EXPECT_EQ(map["ApiHandler"], expected_api);
 }
-
 
 // Test ToString for NginxConfig
 TEST_F(NginxConfigParserTest, configToString)
@@ -195,10 +197,10 @@ TEST_F(NginxConfigParserTest, trailingSlashes)
   bool success = parser.Parse("./parser_tests/trailing_slashes_config", &out_config);
   EXPECT_TRUE(success);
   out_config.extract_filesystem_map();
-  std::map<std::string, std::string> map = out_config.get_filesystem_map();
+  std::map<std::string, std::map<std::string, std::string>> map = out_config.get_filesystem_map();
   std::map<std::string, std::string> expected;
   expected.insert({"/static/help/", "./files/images"});
   expected.insert({"/static/", "./files"});
   expected.insert({"/static2/", "./files/www"});
-  EXPECT_EQ(map, expected);
+  EXPECT_EQ(map["StaticHandler"], expected);
 }

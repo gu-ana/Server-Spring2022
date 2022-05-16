@@ -41,8 +41,7 @@ class StaticHandlerTest : public RequestHandlerTest
 class ApiHandlerTest : public RequestHandlerTest
 {
 	protected:
-		// ApiHandler api_handler = ApiHandler("./data_path/");
-		//This was commented out because it didn't build
+		ApiHandler api_handler = ApiHandler("/api/", "./test_fs");
 };
 
 // helper function to set http::request objects

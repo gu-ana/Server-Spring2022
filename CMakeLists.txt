@@ -60,9 +60,9 @@ add_library(api_factory_lib src/api_handler_factory.cc src/request_handler.cc sr
 set(test_libs gtest_main gmock_main) 
 set(logger_libs logger_lib Boost::log_setup Boost::log)
 set(handler_libs request_handler_delegate_lib 
-    echo_handler_lib api_handler_lib static_handler_lib 
-    error_handler_lib mime_types_lib request_handler_lib )
-set(handler_factory_libs static_factory_lib echo_factory_lib error_factory_lib
+    echo_handler_lib static_handler_lib api_handler_lib 
+    error_handler_lib mime_types_lib request_handler_lib)
+set(handler_factory_libs static_factory_lib echo_factory_lib api_factory_lib error_factory_lib
     handler_factory_lib)
 
 #Updated executable name, srcs, and deps

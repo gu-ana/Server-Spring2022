@@ -80,7 +80,7 @@ int NginxConfig::getPort() {
   return -1;  
 }
 
-std::map<std::string, std::string> NginxConfig::get_filesystem_map() {
+std::map<std::string, std::map<std::string, std::string>> NginxConfig::get_filesystem_map() {
   return filesystem_map_;
 }
 
@@ -142,15 +142,13 @@ void NginxConfig::extract_filesystem_map()
             }
             for(const auto& location_line : block_line->child_block_->statements_)
             {
-              if(location_line->tokens_[0] == "root")
-              {
-                // location /static/ {
-                //  root ./files;
-                // }
-                // maps location such as "/static/" to path specified by root "./files"
-                std::string location_path = handle_trailing_slashes(block_line->tokens_[1]);
-                filesystem_map_.insert({location_path, location_line->tokens_[1]});
-              }
+              // location /static/ StaticHandler {
+              //  root ./files;
+              // }
+              // maps location such as "/static/" to path specified by root "./files"
+              std::string location_path = handle_trailing_slashes(block_line->tokens_[1]);
+              std::string handler_type = block_line->tokens_[2];
+              filesystem_map_[handler_type].insert({location_path, location_line->tokens_[1]});
             }
           }
         }
