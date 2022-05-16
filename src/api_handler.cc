@@ -213,6 +213,23 @@ bool ApiHandler::handlePut(vector<std::string> uri, http::request<http::string_b
     return true;
 }
 
+bool is_number(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
+bool isFileNumber(vector<string> uri) 
+{
+    if (uri.size() == 2)
+    {
+        std::string file_no = uri[1];
+        return is_number(file_no);
+    }
+    return true;
+}
+
 
 bool ApiHandler::handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse)
 {   
@@ -226,6 +243,14 @@ bool ApiHandler::handle_request(http::request<http::string_body> httpRequest, ht
 
     // /api/Shoes --> {shoes in our uri} 
     vector<string> uri = split(target,'/');
+
+    bool validFile = isFileNumber(uri);
+    if (validFile == false)
+    {
+        LOG(error) << "The requested file is not a number\n";
+        set_response(http::status::bad_request, "text/plain", "Requested file must be a number\n", httpResponse);
+        return false;
+    }
 
     if (method == "POST") 
     {
