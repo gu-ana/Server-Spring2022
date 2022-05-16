@@ -38,6 +38,11 @@ std::string extractEntity(vector<string> uri)
     return "/" + uri[0];
 }
 
+std::string extractFileName(vector<string> uri)
+{
+    return "/" + uri[1];
+}
+
 int getUniqueFileName(boost::filesystem::path p) 
 {
     int largest_file = 0; // store index of largest file in directory
@@ -56,8 +61,15 @@ int getUniqueFileName(boost::filesystem::path p)
 }
 
 // Creates file and returns the file number created
-int handlePost(http::request<http::string_body> httpRequest, vector<std::string> uri)
+bool ApiHandler::handlePost(vector<std::string> uri, http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse)
 {
+    if (uri.size() != 1)
+    {
+        LOG(error) << "POST request has more than one entity, please post to /api/{entity} only.";
+        set_response(http::status::bad_request, "text/plain", "Not a valid API request target for POST\n", httpResponse);
+        return false;
+    }
+
     std::string filePath = data_path_ + extractEntity(uri);
     std::string postBody = httpRequest.body();
     
@@ -76,7 +88,129 @@ int handlePost(http::request<http::string_body> httpRequest, vector<std::string>
     myfile << postBody;
     myfile.close();
 
-    return created_file;
+    std::string json_response = "{\"id\": " + to_string(created_file) + "}";
+    set_response(http::status::ok, "text/plain", json_response, httpResponse);
+
+    return true;
+}
+
+std::string makeFileList(boost::filesystem::path p) 
+{
+    std::string result = "[";
+    for (const auto &entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {}))
+    {
+        std::string curr_file_name = entry.path().stem().string();
+        result = result + curr_file_name + ", ";
+    }
+    result = result.substr(0, result.length() - 2); // extra ,_ at the end of string
+    result = result + "]";
+    return result;
+}
+
+std::string extractFileContents(std::string fileName)
+{
+    ifstream myfile(fileName);
+    std::string line;
+    std::string file_contents = "";
+    while (getline(myfile, line))
+    {
+        file_contents = file_contents + line + "\n";
+    }
+    myfile.close();
+    return file_contents;
+}
+
+bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_body>& httpResponse) 
+{
+    std::string filePath = data_path_ + extractEntity(uri);
+    boost::filesystem::path p(filePath);
+    if (boost::filesystem::exists(p) == false)
+    {
+        LOG(error) << "Cannot find directory " << extractEntity(uri);
+        set_response(http::status::bad_request, "text/plain", "Invalid entity requested\n", httpResponse);
+        return false;
+    }
+    if (uri.size() == 1)
+    {
+        // List
+        std::string json_list = makeFileList(p);
+        set_response(http::status::ok, "text/plain", json_list, httpResponse);
+    }
+    else if (uri.size() == 2)
+    {
+        // Retrieve
+        std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
+        string file_contents = "";
+        ifstream myfile(fileName);
+        if (myfile.is_open())
+        {
+            file_contents = extractFileContents(fileName);
+            set_response(http::status::ok, "text/plain", file_contents, httpResponse);
+
+        }
+        else
+        {
+            LOG(error) << "Queried file does not exist";
+            set_response(http::status::bad_request, "text/plain", "Requested ID does not exist\n", httpResponse);
+            return false;
+        }
+    }
+    else 
+    {
+        LOG(error) << "GET request has more than two entities, please post to /api/{entity}/[file] only.";
+        set_response(http::status::bad_request, "text/plain", "Not a valid API request target for GET\n", httpResponse);
+        return false;
+    }    
+    return true;
+}
+
+bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_body>& httpResponse) 
+{
+    std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
+    if (boost::filesystem::remove(fileName) == 0)
+    {
+        LOG(error) << "Could not delete file " << fileName;
+        set_response(http::status::bad_request, "text/plain", "Could not delete requested ID\n", httpResponse);
+        return false;
+    }
+    else
+    {
+        set_response(http::status::ok, "text/plain", "Deleted file " + fileName, httpResponse);
+        return true;
+    }
+}
+
+bool ApiHandler::handlePut(vector<std::string> uri, http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse)
+{
+    if (uri.size() != 2)
+    {
+        LOG(error) << "PUT request has more than one entity, please post to /api/{entity} only.";
+        set_response(http::status::bad_request, "text/plain", "Not a valid API request target for PUT\n", httpResponse);
+        return false;
+    }
+
+    std::string filePath = data_path_ + extractEntity(uri);
+    std::string postBody = httpRequest.body();
+    
+        
+    boost::filesystem::path p(filePath);
+    if (boost::filesystem::exists(p) == false)
+    {
+        boost::filesystem::create_directory(p);
+    }
+        
+    std::string modified_file = uri[1];
+
+    filePath = filePath + "/" + modified_file;
+    ofstream myfile;
+    myfile.open(filePath);
+    myfile << postBody;
+    myfile.close();
+
+    std::string json_response = "{\"id\": " + modified_file + "}";
+    set_response(http::status::ok, "text/plain", json_response, httpResponse);
+
+    return true;
 }
 
 
@@ -96,35 +230,30 @@ bool ApiHandler::handle_request(http::request<http::string_body> httpRequest, ht
     if (method == "POST") 
     {
         // CREATE
-        if (uri.size() != 1)
-        {
-            LOG(error) << "POST request has more than one entity, please post to /api/{entity} only.";
-            set_response(http::status::bad_request, "text/plain", "Not a valid API request target for POST\n", httpResponse);
-            return false;
-        }
-        int created_file_number = handlePost(httpRequest, uri);
-        std::string json_response = "{\"id\": " + to_string(created_file_number) + "}";
-        set_response(http::status::ok, "text/plain", json_response, httpResponse);
+        bool post_result = handlePost(uri, httpRequest, httpResponse);
+        return post_result;
+        
     }
     else if (method == "GET") 
     {
         // RETRIEVE & LIST
+        bool get_result = handleGet(uri, httpResponse);
+        return get_result;
     }
     else if (method == "PUT") 
     {
         // UPDATE
-
+        bool put_result = handlePut(uri, httpRequest, httpResponse);
+        return put_result;
     }
     else if (method == "DELETE") 
     {
         // DELETE
-
+        bool delete_result = handleDelete(uri, httpResponse);
+        return delete_result;
     }
     else
     {
         return false;
     }
-
-    
-    return true;
 }
