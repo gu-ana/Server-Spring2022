@@ -240,7 +240,7 @@ TEST_F(ApiHandlerTest, ApiDELETERemoveFile)
 	retVal = api_handler.handle_request(httpRequest, httpResponse);
 	EXPECT_TRUE(retVal);
 	EXPECT_FALSE(ffs->exists("./mnt/crud/shoes/1"));
-	EXPECT_EQ(httpResponse.body(), "Deleted file ./mnt/crud/shoes/1\n");
+	EXPECT_EQ(httpResponse.body(), "Deleted ID ./mnt/crud/shoes/1\n");
 }
 
 // DELETE returns an error if the file at data_path/entity/id does not exist

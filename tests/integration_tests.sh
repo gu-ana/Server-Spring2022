@@ -4,6 +4,7 @@
 # GCP_PORT_NUM=80
 LOCAL_PORT_NUM=8000
 INTEGRATION_TEST_PATH="./integration_testcases"
+API_TEST_PATH="./mnt"
 
 # setup
 function run_setup()
@@ -11,7 +12,7 @@ function run_setup()
 	# enter build directory to make server
 	cd ../build
 	echo "building server..."
-	make server &>/dev/null
+	make -j 4 server &>/dev/null
 	cd ../tests
 
 	# generate local server config
@@ -115,49 +116,130 @@ function local_static_png_test()
 
 function local_api_test()
 {
-	# mkdir -p "$mnt/"
+	mkdir ${API_TEST_PATH}
 	start_local_server
+
+	# POST
+	# valid POST
 	json_payload='{"data":1}'
-	echo "Testing POST functionality"
-	post_res="$(curl -s -X POST http://localhost:${LOCAL_PORT_NUM}/api/shoes -d \'$json_payload\')"
+	post_res="$(curl -s -X POST http://localhost:${LOCAL_PORT_NUM}/api/shoes -d $json_payload)"
 	expected_post_res='{"id": 1}'
 	if [[ "$expected_post_res" != "$post_res" ]];
 	then
-		echo "Didnt work but expected is $expected_post_res"
-		echo "post res1:  $post_res"
-		rm -rf mnt/shoes/*
+		echo "Failed valid POST"
+		echo "Expected Response: $expected_post_res"
+		echo "Actual Response: $post_res"
 		kill ${local_server_pid}
-		exit 1
+		rm -r ${API_TEST_PATH}
+		return 1
 	fi
-	kill ${local_server_pid}
 
-	start_local_server
-	echo "Testing DELETE functionality"
-	curl -X DELETE http://localhost:${LOCAL_PORT_NUM}/api/shoes/1 &>/dev/null
-	# if file was not deleted
-	if [[ -f "../mnt/crud/IntegratonTest/1" ]];
+	file_contents="$(cat ${API_TEST_PATH}/shoes/1)"
+	if [[ "$json_payload" != "$file_contents" ]];
+    then
+        echo "Failed valid POST"
+		echo "Expected File Contents: $file_contents"
+        echo "Actual File Contents: $json_payload"
+        kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+        return 1
+    fi
+
+	# GET
+	# valid GET id
+    get_res="$(curl -s -X GET http://localhost:${LOCAL_PORT_NUM}/api/shoes/1)"
+    expected_get_res="$(cat ${API_TEST_PATH}/shoes/1)"
+    if [[ "$get_res" != "$file_contents" ]];
+    then
+        echo "Failed valid GET id"
+		echo "Expected Response: $expected_get_res"
+		echo "Actual Response: $get_res"
+        kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+        return 1
+    fi
+
+	# valid GET list
+	get_res="$(curl -s -X GET http://localhost:${LOCAL_PORT_NUM}/api/shoes)"
+	expected_get_res='[1]'
+	if [[ "$expected_get_res" != "$get_res" ]];
 	then
-		echo "Didn't delete successfully"
+		echo "Failed valid GET list"
+		echo "Expected Response: $expected_get_res"
+		echo "Actual Response: $get_res"
 		kill ${local_server_pid}
-		exit 1
+		rm -r ${API_TEST_PATH}
+		return 1
 	fi
+
+	# PUT
+	# valid PUT update
+	json_payload='{"data":2}'
+	put_res="$(curl -s -X PUT http://localhost:${LOCAL_PORT_NUM}/api/shoes/1 -d $json_payload)"
+	expected_put_res='{"id": 1}'
+    if [[ "$put_res" != "$expected_put_res" ]];
+    then
+        echo "Failed valid PUT update"
+		echo "Expected Response: $expected_put_res"
+		echo "Actual Response: $put_res"
+        kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+        return 1
+    fi
+
+	file_contents="$(cat ${API_TEST_PATH}/shoes/1)"
+	if [[ "$json_payload" != "$file_contents" ]];
+    then
+		echo "Failed valid PUT update"
+		echo "Expected File Contents: $file_contents"
+        echo "Actual File Contents: $json_payload"
+        kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+        return 1
+    fi
+
+	# valid PUT create
+	json_payload='{"data":3}'
+	put_res="$(curl -s -X PUT http://localhost:${LOCAL_PORT_NUM}/api/shoes/2 -d $json_payload)"
+	expected_put_res='{"id": 2}'
+    if [[ "$put_res" != "$expected_put_res" ]];
+    then
+		echo "Failed valid PUT create"
+		echo "Expected Response: $expected_put_res"
+		echo "Actual Response: $put_res"
+        kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+        return 1
+    fi
+
+	file_contents="$(cat ${API_TEST_PATH}/shoes/2)"
+	if [[ "$json_payload" != "$file_contents" ]];
+    then
+		echo "Failed valid PUT create"
+		echo "Expected File Contents: $file_contents"
+        echo "Actual File Contents: $json_payload"
+        kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+        return 1
+    fi
+
+	# DELETE
+	# valid DELETE
+	curl -X DELETE http://localhost:${LOCAL_PORT_NUM}/api/shoes/1 &>/dev/null
+	
+	if [[ -f "${API_TEST_PATH}/shoes/1" ]]; # checks if file still exists
+	then
+		echo "Failed valid DELETE"
+		echo "File still exists"
+		kill ${local_server_pid}
+		rm -r ${API_TEST_PATH}
+		return 1
+	fi
+	
 	kill ${local_server_pid}
+	rm -r ${API_TEST_PATH}
 	
 }
-
-
-
-# start_local_server
-	# printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	# sleep 0.5
-	# kill ${local_server_pid} #nc process is killed when the server is killed
-	# diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
-
-# start_local_server
-	# printf 'GET /api HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	# sleep 0.5
-	# kill ${local_server_pid} #nc process is killed when the server is killed
-	# diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
 
 # to add new tests, add name below
 test_list=(local_echo local_bad_request local_file_not_found

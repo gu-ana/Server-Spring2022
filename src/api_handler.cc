@@ -137,13 +137,13 @@ bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_bo
     std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
     if (!fs_->remove(fileName))
     {
-        LOG(error) << "Could not delete file " << fileName;
+        LOG(error) << "Could not delete ID " << fileName;
         set_response(http::status::bad_request, "text/plain", "Could not delete requested ID\n", httpResponse);
         return false;
     }
     else
     {
-        set_response(http::status::ok, "text/plain", "Deleted file " + fileName + "\n", httpResponse);
+        set_response(http::status::ok, "text/plain", "Deleted ID " + fileName + "\n", httpResponse);
         return true;
     }
 }
