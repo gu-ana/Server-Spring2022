@@ -13,6 +13,8 @@ class FileSystem {
         virtual bool remove(const boost::filesystem::path& p) = 0;
         virtual bool write_file(const boost::filesystem::path& p, const std::string& body) = 0;
         virtual bool read_file(const boost::filesystem::path& p, std::string& file) = 0;
-}
+        virtual int get_unique_file_name(const boost::filesystem::path p) = 0;
+        virtual std::string get_file_list(const boost::filesystem::path p) = 0;
+};
 
 #endif

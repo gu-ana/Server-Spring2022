@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <iostream>
 
 #include "gtest/gtest.h"
 #include "request_handler.h"
@@ -7,6 +8,7 @@
 #include "static_handler.h"
 #include "error_handler.h"
 #include "api_handler.h"
+#include "fake_file_system.h"
 
 class RequestHandlerTest : public ::testing::Test
 {
@@ -41,7 +43,8 @@ class StaticHandlerTest : public RequestHandlerTest
 class ApiHandlerTest : public RequestHandlerTest
 {
 	protected:
-		ApiHandler api_handler = ApiHandler("/api/", "./test_fs");
+		std::shared_ptr<FileSystem> ffs;
+		ApiHandler api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
 };
 
 // helper function to set http::request objects
@@ -119,59 +122,175 @@ TEST_F(StaticHandlerTest, FileNotFound)
 // POST finds correct next available ID and returns {"id": <ID>} in the response
 TEST_F(ApiHandlerTest, ApiPOSTReturnID)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.body(), "{\"id\": 1}");
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.body(), "{\"id\": 2}");
 }
 
 // POST creates a file in the data_path/entity with the correct ID
 TEST_F(ApiHandlerTest, ApiPOSTCreateFile)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_TRUE(ffs->exists("./mnt/crud/shoes/1"));
 }
 
 // GET reads file at data_path/entity/id and returns it
 TEST_F(ApiHandlerTest, ApiGETReadFile)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	char get_file[] = "GET /api/shoes/1 HTTP/1.1\r\n\r\n";
+	parse_request(get_file, httpRequest);
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.body(), "Read file successfully\n");
 }
 
 // GET reads file at data_path/entity/id but file not found
 TEST_F(ApiHandlerTest, ApiGETFileNotFound)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	char get_wrong_file[] = "GET /api/shoes/2 HTTP/1.1\r\n\r\n";
+	parse_request(get_wrong_file, httpRequest);
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.body(), "Requested ID does not exist\n");
 }
 
 // PUT body was successfully written to new data_path/entity/id
 TEST_F(ApiHandlerTest, ApiPUTNewFile)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::put);
+	httpRequest.target("/api/shoes/1");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_TRUE(ffs->exists("./mnt/crud/shoes/1"));
 }
 
 // PUT body was successfully written to update data_path/entity/id
 TEST_F(ApiHandlerTest, ApiPUTUpdateFile)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	std::string new_content = "{\"data\": 2}";
+	httpRequest.method(http::verb::put);
+	httpRequest.target("/api/shoes/1");
+	httpRequest.body() = content;
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_TRUE(ffs->exists("./mnt/crud/shoes/1"));
 }
 
 // DELETE removes the file at data_path/entity/id
 TEST_F(ApiHandlerTest, ApiDELETERemoveFile)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	httpRequest.method(http::verb::delete_);
+	httpRequest.target("/api/shoes/1");
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_FALSE(ffs->exists("./mnt/crud/shoes/1"));
+	EXPECT_EQ(httpResponse.body(), "Deleted file ./mnt/crud/shoes/1\n");
 }
 
 // DELETE returns an error if the file at data_path/entity/id does not exist
 TEST_F(ApiHandlerTest, ApiDELETEFileNotFound)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	httpRequest.method(http::verb::delete_);
+	httpRequest.target("/api/shoes/2");
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_TRUE(ffs->exists("./mnt/crud/shoes/1"));
+	EXPECT_EQ(httpResponse.body(), "Could not delete requested ID\n");
 }
 
-// List: GET /api/entity returns json list of valid ids for entity
 TEST_F(ApiHandlerTest, ApiGETList)
 {
-	EXPECT_TRUE(1);
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	char get_list[] = "GET /api/shoes HTTP/1.1\r\n\r\n";
+	parse_request(get_list, httpRequest);
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.body(), "[1, 2]");
 }
 
 // List: GET /api/entity for invalid entity
 TEST_F(ApiHandlerTest, ApiGETEntityNotFound)
 {
-	EXPECT_TRUE(1);
+	httpRequest.method(http::verb::get);
+	httpRequest.target("/api/shoes");
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.body(), "Invalid entity requested\n");
 }

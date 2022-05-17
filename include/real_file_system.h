@@ -11,6 +11,8 @@ class RealFileSystem : public FileSystem {
         bool remove(const boost::filesystem::path& p);
         bool write_file(const boost::filesystem::path& p, const std::string& body);
         bool read_file(const boost::filesystem::path& p, std::string& file);
-}
+        int get_unique_file_name(const boost::filesystem::path p);
+        std::string get_file_list(const boost::filesystem::path p);
+};
 
 #endif

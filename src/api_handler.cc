@@ -12,8 +12,8 @@
 
 using namespace std;
 
-ApiHandler::ApiHandler(std::string location, std::string data_path)
-    :location_(location), data_path_(data_path){}
+ApiHandler::ApiHandler(std::string location, std::string data_path, std::shared_ptr<FileSystem> fs)
+    :location_(location), data_path_(data_path), fs_(fs){}
 
 // split function helps break up the uri into more manageable parts
 vector<string> split(const string &s, char delim) 
@@ -43,23 +43,6 @@ std::string extractFileName(vector<string> uri)
     return "/" + uri[1];
 }
 
-int getUniqueFileName(boost::filesystem::path p) 
-{
-    int largest_file = 0; // store index of largest file in directory
-    for (const auto &entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {}))
-    {
-        std::string curr_file_name = entry.path().stem().string();
-        int curr_file_num = stoi(curr_file_name);
-        if (curr_file_num > largest_file)
-        {
-            largest_file = curr_file_num;
-        }
-    }
-
-    // Now that we have the largest file number in the directory, add 1 and add to file path
-    return largest_file + 1;
-}
-
 // Creates file and returns the file number created
 bool ApiHandler::handlePost(vector<std::string> uri, http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse)
 {
@@ -72,51 +55,31 @@ bool ApiHandler::handlePost(vector<std::string> uri, http::request<http::string_
 
     std::string filePath = data_path_ + extractEntity(uri);
     std::string postBody = httpRequest.body();
-    
         
     boost::filesystem::path p(filePath);
-    if (boost::filesystem::exists(p) == false)
+    if (fs_->exists(p) == false)
     {
-        boost::filesystem::create_directory(p);
+        fs_->create_directory(p);
     }
-        
-    int created_file = getUniqueFileName(p);
+
+    int created_file = fs_->get_unique_file_name(p);
 
     filePath = filePath + "/" + std::to_string(created_file);
-    ofstream myfile;
-    myfile.open(filePath);
-    myfile << postBody;
-    myfile.close();
+    boost::filesystem::path fp(filePath);
+    LOG(info) << "Writing data to server file system at " << fp.string();
 
+    fs_->write_file(fp, postBody);
     std::string json_response = "{\"id\": " + to_string(created_file) + "}";
     set_response(http::status::ok, "text/plain", json_response, httpResponse);
 
     return true;
 }
 
-std::string makeFileList(boost::filesystem::path p) 
+std::string ApiHandler::extractFileContents(std::string fileName)
 {
-    std::string result = "[";
-    for (const auto &entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {}))
-    {
-        std::string curr_file_name = entry.path().stem().string();
-        result = result + curr_file_name + ", ";
-    }
-    result = result.substr(0, result.length() - 2); // extra ,_ at the end of string
-    result = result + "]";
-    return result;
-}
-
-std::string extractFileContents(std::string fileName)
-{
-    ifstream myfile(fileName);
-    std::string line;
-    std::string file_contents = "";
-    while (getline(myfile, line))
-    {
-        file_contents = file_contents + line + "\n";
-    }
-    myfile.close();
+    std::string file_contents;
+    boost::filesystem::path filePath(fileName);
+    fs_->read_file(fileName, file_contents);
     return file_contents;
 }
 
@@ -124,7 +87,7 @@ bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_
 {
     std::string filePath = data_path_ + extractEntity(uri);
     boost::filesystem::path p(filePath);
-    if (boost::filesystem::exists(p) == false)
+    if (fs_->exists(p) == false)
     {
         LOG(error) << "Cannot find directory " << extractEntity(uri);
         set_response(http::status::bad_request, "text/plain", "Invalid entity requested\n", httpResponse);
@@ -133,20 +96,18 @@ bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_
     if (uri.size() == 1)
     {
         // List
-        std::string json_list = makeFileList(p);
+        std::string json_list = fs_->get_file_list(p);
         set_response(http::status::ok, "text/plain", json_list, httpResponse);
     }
     else if (uri.size() == 2)
     {
         // Retrieve
-        std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
-        string file_contents = "";
-        ifstream myfile(fileName);
-        if (myfile.is_open())
+        std::string fileName = filePath + extractFileName(uri);
+        std::string file_contents;
+        bool read_success = fs_->read_file(fileName, file_contents);
+        if (read_success) 
         {
-            file_contents = extractFileContents(fileName);
             set_response(http::status::ok, "text/plain", file_contents, httpResponse);
-
         }
         else
         {
@@ -174,7 +135,7 @@ bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_bo
     }
     
     std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
-    if (boost::filesystem::remove(fileName) == 0)
+    if (!fs_->remove(fileName))
     {
         LOG(error) << "Could not delete file " << fileName;
         set_response(http::status::bad_request, "text/plain", "Could not delete requested ID\n", httpResponse);
@@ -182,7 +143,7 @@ bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_bo
     }
     else
     {
-        set_response(http::status::ok, "text/plain", "Deleted file " + fileName, httpResponse);
+        set_response(http::status::ok, "text/plain", "Deleted file " + fileName + "\n", httpResponse);
         return true;
     }
 }
@@ -201,19 +162,16 @@ bool ApiHandler::handlePut(vector<std::string> uri, http::request<http::string_b
     
         
     boost::filesystem::path p(filePath);
-    if (boost::filesystem::exists(p) == false)
+    if (fs_->exists(p) == false)
     {
-        boost::filesystem::create_directory(p);
+        fs_->create_directory(p);
     }
         
     std::string modified_file = uri[1];
 
     filePath = filePath + "/" + modified_file;
-    ofstream myfile;
-    myfile.open(filePath);
-    myfile << postBody;
-    myfile.close();
-
+    boost::filesystem::path fpath(filePath);
+    fs_->write_file(fpath, postBody);
     std::string json_response = "{\"id\": " + modified_file + "}";
     set_response(http::status::ok, "text/plain", json_response, httpResponse);
 
@@ -264,7 +222,6 @@ bool ApiHandler::handle_request(http::request<http::string_body> httpRequest, ht
         // CREATE
         bool post_result = handlePost(uri, httpRequest, httpResponse);
         return post_result;
-        
     }
     else if (method == "GET") 
     {

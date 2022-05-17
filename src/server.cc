@@ -1,7 +1,6 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
-
 #include "server.h"
 #include "logger.h"
 #include "session.h"
@@ -10,6 +9,7 @@
 #include "echo_handler_factory.h"
 #include "api_handler_factory.h"
 #include "error_handler_factory.h"
+#include "real_file_system.h"
 
 using boost::asio::ip::tcp;
 
@@ -70,11 +70,13 @@ void Server::create_factory_map()
         routes.insert({location, static_factory});
     }
 
+    // init filesystem
+    std::shared_ptr<FileSystem> fs(new RealFileSystem());
     for (fileMappingIter=api_handler_map.begin(); fileMappingIter!=api_handler_map.end(); fileMappingIter++)
     {
         std::string location = fileMappingIter->first;
         std::string data_path = fileMappingIter->second;
-        std::shared_ptr<RequestHandlerFactory> api_factory(new ApiHandlerFactory(location,data_path));
+        std::shared_ptr<RequestHandlerFactory> api_factory(new ApiHandlerFactory(location, data_path, fs));
         routes.insert({location, api_factory});
     }
 

@@ -11,6 +11,6 @@ server {
     root ./files/www;
   }
   location /api/ ApiHandler {
-    data_path ./mnt;
+    data_path ./mnt/crud;
   }
 }
