@@ -130,7 +130,7 @@ bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_bo
     if (uri.size() != 2)
     {
         LOG(error) << "DELETE request has incorrect number of arguments, should be /api/{entity}/{id}.";
-        set_response(http::status::bad_request, "text/plain", "Not a valid API request target for POST\n", httpResponse);
+        set_response(http::status::bad_request, "text/plain", "Not a valid API request target for DELETE\n", httpResponse);
         return false;
     }
     
@@ -143,7 +143,7 @@ bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_bo
     }
     else
     {
-        set_response(http::status::ok, "text/plain", "Deleted ID " + fileName + "\n", httpResponse);
+        set_response(http::status::ok, "text/plain", "Successfully deleted ID\n", httpResponse);
         return true;
     }
 }

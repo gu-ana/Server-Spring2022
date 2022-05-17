@@ -21,7 +21,13 @@ bool RealFileSystem::is_regular_file(const boost::filesystem::path& p)
 
 bool RealFileSystem::remove(const boost::filesystem::path& p)
 {
-    return boost::filesystem::remove(p);
+    bool success = boost::filesystem::remove(p);
+
+    // if directory is empty, delete it
+    if (boost::filesystem::is_empty(p.parent_path())) {
+        boost::filesystem::remove_all(p.parent_path());
+    }
+    return success;
 }
 
 bool RealFileSystem::write_file(const boost::filesystem::path& p, const std::string& body)
@@ -33,11 +39,19 @@ bool RealFileSystem::write_file(const boost::filesystem::path& p, const std::str
 
 bool RealFileSystem::read_file(const boost::filesystem::path& p, std::string& file)
 {
-    std::ifstream t(p.string());
-    std::stringstream buffer;
-    buffer << t.rdbuf();
-    file = buffer.str();
-    return true;
+    if (boost::filesystem::is_regular_file(p)) 
+    {
+        std::ifstream t(p.string());
+        std::stringstream buffer;
+        buffer << t.rdbuf();
+        file = buffer.str();
+        return true;
+    }
+    else 
+    {
+        return false;
+    }
+    
 }
 
 int RealFileSystem::get_unique_file_name(const boost::filesystem::path p)
