@@ -21,6 +21,7 @@ function run_setup()
 	echo "location /static/help StaticHandler { root ./files/images; }" >> local_test_config
 	echo "location /static/ StaticHandler { root ./files; }" >> local_test_config
 	echo "location /static2/ StaticHandler { root ./files/www; }" >> local_test_config
+	echo "location /api/ ApiHandler { data_path ./mnt; }" >> local_test_config
 	echo "}" >> local_test_config
 }
 
@@ -112,10 +113,56 @@ function local_static_png_test()
 	diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
 }
 
+function local_api_test()
+{
+	# mkdir -p "$mnt/"
+	start_local_server
+	json_payload='{"data":1}'
+	echo "Testing POST functionality"
+	post_res="$(curl -s -X POST http://localhost:${LOCAL_PORT_NUM}/api/shoes -d \'$json_payload\')"
+	expected_post_res='{"id": 1}'
+	if [[ "$expected_post_res" != "$post_res" ]];
+	then
+		echo "Didnt work but expected is $expected_post_res"
+		echo "post res1:  $post_res"
+		rm -rf mnt/shoes/*
+		kill ${local_server_pid}
+		exit 1
+	fi
+	kill ${local_server_pid}
+
+	start_local_server
+	echo "Testing DELETE functionality"
+	curl -X DELETE http://localhost:${LOCAL_PORT_NUM}/api/shoes/1 &>/dev/null
+	# if file was not deleted
+	if [[ -f "../mnt/crud/IntegratonTest/1" ]];
+	then
+		echo "Didn't delete successfully"
+		kill ${local_server_pid}
+		exit 1
+	fi
+	kill ${local_server_pid}
+	
+}
+
+
+
+# start_local_server
+	# printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	# sleep 0.5
+	# kill ${local_server_pid} #nc process is killed when the server is killed
+	# diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
+
+# start_local_server
+	# printf 'GET /api HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	# sleep 0.5
+	# kill ${local_server_pid} #nc process is killed when the server is killed
+	# diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
+
 # to add new tests, add name below
 test_list=(local_echo local_bad_request local_file_not_found
 	local_static_txt local_static_html local_static_zip
-	local_static_jpg local_static_png)
+	local_static_jpg local_static_png local_api)
 
 # run setup commands
 run_setup
