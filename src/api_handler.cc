@@ -166,6 +166,13 @@ bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_
 
 bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_body>& httpResponse) 
 {
+    if (uri.size() != 2)
+    {
+        LOG(error) << "DELETE request has incorrect number of arguments, should be /api/{entity}/{id}.";
+        set_response(http::status::bad_request, "text/plain", "Not a valid API request target for POST\n", httpResponse);
+        return false;
+    }
+    
     std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
     if (boost::filesystem::remove(fileName) == 0)
     {
