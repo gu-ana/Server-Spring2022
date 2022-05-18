@@ -7,6 +7,7 @@
 #include "echo_handler.h"
 #include "static_handler.h"
 #include "error_handler.h"
+#include "sleep_handler.h"
 #include "api_handler.h"
 #include "fake_file_system.h"
 
@@ -21,6 +22,12 @@ class EchoHandlerTest : public RequestHandlerTest
 {
 	protected:
 		EchoHandler echo_handler;
+};
+
+class SleepHandlerTest : public RequestHandlerTest
+{
+	protected:
+		SleepHandler sleep_handler;
 };
 
 class ErrorHandlerTest : public RequestHandlerTest
@@ -72,6 +79,16 @@ TEST_F(EchoHandlerTest, CorrectFormat)
 	EXPECT_TRUE(retVal);
 	EXPECT_EQ(httpResponse.result_int(), 200);
 	EXPECT_EQ(httpResponse.body(), correct_echo);
+}
+
+// test correct sleep
+TEST_F(SleepHandlerTest, CorrectFormat)
+{
+	char correct_sleep[] = "GET /sleep HTTP/1.1\r\n\r\n";
+	parse_request(correct_sleep, httpRequest);
+	bool retVal = sleep_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 200);
 }
 
 // test that ErrorHandler returns HTTP 404
