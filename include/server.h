@@ -14,7 +14,8 @@ using boost::asio::ip::tcp;
 
 class Server {
     public:
-        Server(boost::asio::io_service& io_service, short port, NginxConfig* config);
+        Server(boost::asio::io_service& io_service, short port, NginxConfig* config, std::size_t thread_pool_size);
+        void run();
     private:
         //functions
         void start_accept();
@@ -24,6 +25,7 @@ class Server {
         boost::asio::io_service& io_service_;
         tcp::acceptor acceptor_;
         NginxConfig* config_;
+        std::size_t thread_pool_size_;
         std::map<std::string, std::shared_ptr<RequestHandlerFactory>> routes;
 
         

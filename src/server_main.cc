@@ -12,8 +12,8 @@
 
 #include <iostream>
 #include <map>
-
 #include <csignal>
+#include <boost/thread.hpp>
 
 #include "server.h"
 #include "config_parser.h"
@@ -65,9 +65,9 @@ int main(int argc, char* argv[])
     config.extract_filesystem_map();
     boost::asio::io_service io_service;
 
-    Server s(io_service, port, &config);
+    Server s(io_service, port, &config, boost::thread::hardware_concurrency());
 
-    io_service.run();
+    s.run();
   }
   catch (std::exception& e)
   {

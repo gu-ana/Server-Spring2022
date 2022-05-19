@@ -138,10 +138,10 @@ function local_api_test()
 	if [[ "$json_payload" != "$file_contents" ]];
     then
         echo "Failed valid POST"
-		echo "Expected File Contents: $file_contents"
-        echo "Actual File Contents: $json_payload"
+		echo "Expected File Contents: $json_payload"
+        echo "Actual File Contents: $file_contents"
         kill ${local_server_pid}
-		rm -r ${API_TEST_PATH}
+		# rm -r ${API_TEST_PATH}
         return 1
     fi
 
@@ -191,8 +191,8 @@ function local_api_test()
 	if [[ "$json_payload" != "$file_contents" ]];
     then
 		echo "Failed valid PUT update"
-		echo "Expected File Contents: $file_contents"
-        echo "Actual File Contents: $json_payload"
+		echo "Expected File Contents: $json_payload"
+        echo "Actual File Contents: $file_contents"
         kill ${local_server_pid}
 		rm -r ${API_TEST_PATH}
         return 1
@@ -216,8 +216,8 @@ function local_api_test()
 	if [[ "$json_payload" != "$file_contents" ]];
     then
 		echo "Failed valid PUT create"
-		echo "Expected File Contents: $file_contents"
-        echo "Actual File Contents: $json_payload"
+		echo "Expected File Contents: $json_payload"
+        echo "Actual File Contents: $file_contents"
         kill ${local_server_pid}
 		rm -r ${API_TEST_PATH}
         return 1

@@ -35,12 +35,12 @@ vector<string> split(const string &s, char delim)
 
 std::string extractEntity(vector<string> uri) 
 {
-    return "/" + uri[0];
+    return uri[0];
 }
 
 std::string extractFileName(vector<string> uri)
 {
-    return "/" + uri[1];
+    return uri[1];
 }
 
 // Creates file and returns the file number created
@@ -48,31 +48,30 @@ bool ApiHandler::handlePost(vector<std::string> uri, http::request<http::string_
 {
     if (uri.size() != 1)
     {
-        LOG(error) << "POST request has more than one entity, please post to /api/{entity} only.";
+        LOG(error) << "POST request has invalid target uri, notifying client of bad request.";
         set_response(http::status::bad_request, "text/plain", "Not a valid API request target for POST\n", httpResponse);
         return false;
     }
 
-    std::string filePath = data_path_ + extractEntity(uri);
+    std::string dirPath = data_path_ + "/" + extractEntity(uri);
     std::string postBody = httpRequest.body();
-        
-    boost::filesystem::path p(filePath);
-    if (fs_->exists(p) == false)
+    boost::filesystem::path p(dirPath);
+
+    int created_file_id = fs_->gen_id_and_write_file(p, postBody);
+
+    if (created_file_id == -1) //error
     {
-        fs_->create_directory(p);
+        LOG(error)  << "Unable to generate new file, notifying client.";
+        set_response(http::status::internal_server_error, "text/plain", "Unable to generate ID.", httpResponse);
+        return false;
     }
-
-    int created_file = fs_->get_unique_file_name(p);
-
-    filePath = filePath + "/" + std::to_string(created_file);
-    boost::filesystem::path fp(filePath);
-    LOG(info) << "Writing data to server file system at " << fp.string();
-
-    fs_->write_file(fp, postBody);
-    std::string json_response = "{\"id\": " + to_string(created_file) + "}";
-    set_response(http::status::ok, "text/plain", json_response, httpResponse);
-
-    return true;
+    else 
+    {
+        LOG(info) << "Successfully generated new file " << created_file_id;
+        std::string json_response = "{\"id\": " + to_string(created_file_id) + "}";
+        set_response(http::status::ok, "text/plain", json_response, httpResponse);
+        return true;
+    }
 }
 
 std::string ApiHandler::extractFileContents(std::string fileName)
@@ -85,11 +84,11 @@ std::string ApiHandler::extractFileContents(std::string fileName)
 
 bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_body>& httpResponse) 
 {
-    std::string filePath = data_path_ + extractEntity(uri);
+    std::string filePath = data_path_ + "/" + extractEntity(uri);
     boost::filesystem::path p(filePath);
     if (fs_->exists(p) == false)
     {
-        LOG(error) << "Cannot find directory " << extractEntity(uri);
+        LOG(error) << "Cannot find directory " << "/"  << extractEntity(uri);
         set_response(http::status::bad_request, "text/plain", "Invalid entity requested\n", httpResponse);
         return false;
     }
@@ -102,7 +101,7 @@ bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_
     else if (uri.size() == 2)
     {
         // Retrieve
-        std::string fileName = filePath + extractFileName(uri);
+        std::string fileName = filePath + "/" + extractFileName(uri);
         std::string file_contents;
         bool read_success = fs_->read_file(fileName, file_contents);
         if (read_success) 
@@ -134,10 +133,16 @@ bool ApiHandler::handleDelete(vector<string> uri, http::response<http::string_bo
         return false;
     }
     
-    std::string fileName = data_path_ + extractEntity(uri) + extractFileName(uri);
-    if (!fs_->remove(fileName))
+    std::string fileName = data_path_ + "/" + extractEntity(uri) + "/" + extractFileName(uri);
+    if (!fs_->is_regular_file(fileName))
     {
-        LOG(error) << "Could not delete ID " << fileName;
+        LOG(error) << "Requested ID does not exist." << fileName;
+        set_response(http::status::bad_request, "text/plain", "Requested ID does not exist.\n", httpResponse);
+        return false;
+    }
+    else if (!fs_->remove(fileName))
+    {
+        LOG(error) << "Could not delete requested file " << fileName;
         set_response(http::status::bad_request, "text/plain", "Could not delete requested ID\n", httpResponse);
         return false;
     }
@@ -157,25 +162,24 @@ bool ApiHandler::handlePut(vector<std::string> uri, http::request<http::string_b
         return false;
     }
 
-    std::string filePath = data_path_ + extractEntity(uri);
+    std::string filePath = data_path_ + "/" + extractEntity(uri) + "/" + extractFileName(uri);
     std::string postBody = httpRequest.body();
-    
-        
     boost::filesystem::path p(filePath);
-    if (fs_->exists(p) == false)
+
+    bool write_success = fs_->write_file(p, postBody);
+    if (write_success)
     {
-        fs_->create_directory(p);
+        LOG(info) << "Successfully wrote to file " << extractFileName(uri);
+        std::string json_response = "{\"id\": " + extractFileName(uri) + "}";
+        set_response(http::status::ok, "text/plain", json_response, httpResponse);
+        return true;
     }
-        
-    std::string modified_file = uri[1];
-
-    filePath = filePath + "/" + modified_file;
-    boost::filesystem::path fpath(filePath);
-    fs_->write_file(fpath, postBody);
-    std::string json_response = "{\"id\": " + modified_file + "}";
-    set_response(http::status::ok, "text/plain", json_response, httpResponse);
-
-    return true;
+    else
+    {
+        LOG(error)  << "Unable to write to file, notifying client.";
+        set_response(http::status::internal_server_error, "text/plain", "Unable to write to ID.", httpResponse);
+        return false;
+    }
 }
 
 bool is_number(const std::string& s)
@@ -199,9 +203,9 @@ bool isFileNumber(vector<string> uri)
 bool ApiHandler::handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse)
 {   
     std::string target = std::string(httpRequest.target()).c_str();
-    LOG(info) << "Client requested " << target << '\n';
-
     std::string method = httpRequest.method_string().to_string();
+
+     LOG(info) << "Client requested " << method << " " << target << '\n';
 
     // switch action based on method
     // target is the URI we need
