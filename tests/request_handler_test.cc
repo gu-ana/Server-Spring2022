@@ -8,6 +8,7 @@
 #include "request_handler/static_handler.h"
 #include "request_handler/error_handler.h"
 #include "request_handler/sleep_handler.h"
+#include "request_handler/health_handler.h"
 #include "request_handler/api_handler.h"
 #include "fake_file_system.h"
 
@@ -28,6 +29,12 @@ class SleepHandlerTest : public RequestHandlerTest
 {
 	protected:
 		SleepHandler sleep_handler;
+};
+
+class HealthHandlerTest : public RequestHandlerTest
+{
+	protected:
+		HealthHandler health_handler;
 };
 
 class ErrorHandlerTest : public RequestHandlerTest
@@ -91,6 +98,17 @@ TEST_F(SleepHandlerTest, CorrectFormat)
 	EXPECT_EQ(httpResponse.result_int(), 200);
 }
 
+// test that HealthHandler returns HTTP 200
+TEST_F(HealthHandlerTest, CorrectFormat)
+{
+	char correct_health[] = "GET /health HTTP/1.1\r\n\r\n";
+	parse_request(correct_health, httpRequest);
+	bool retVal = health_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 200);
+	EXPECT_EQ(httpResponse.body(), "OK\n");
+}
+
 // test that ErrorHandler returns HTTP 404
 TEST_F(ErrorHandlerTest, HTTP404Response)
 {
@@ -102,7 +120,7 @@ TEST_F(ErrorHandlerTest, HTTP404Response)
 	EXPECT_EQ(httpResponse.body(), "Bad Request\n");
 }
 
-// test exisitng txt file
+// test existing txt file
 TEST_F(StaticHandlerTest, ValidTxt)
 {
 	char correct_txt[] = "GET /static/file1.txt HTTP/1.1\r\n\r\n";

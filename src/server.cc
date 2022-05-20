@@ -11,6 +11,7 @@
 #include "request_handler_factory/api_handler_factory.h"
 #include "request_handler_factory/error_handler_factory.h"
 #include "request_handler_factory/sleep_handler_factory.h"
+#include "request_handler_factory/health_handler_factory.h"
 #include "real_file_system.h"
 
 using boost::asio::ip::tcp;
@@ -75,6 +76,9 @@ void Server::create_factory_map()
     // create sleep handler factory mapping
     std::shared_ptr<RequestHandlerFactory> sleep_factory(new SleepHandlerFactory());
     routes.insert({"/sleep", sleep_factory});
+    // create health handler factory mapping
+    std::shared_ptr<RequestHandlerFactory> health_factory(new HealthHandlerFactory());
+    routes.insert({"/health", health_factory});
     // create 404 (error) handler factory
     std::shared_ptr<RequestHandlerFactory> error_factory(new ErrorHandlerFactory());
     routes.insert({"/", error_factory});

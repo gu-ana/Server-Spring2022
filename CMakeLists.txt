@@ -48,6 +48,7 @@ add_library(error_handler_lib src/request_handler/error_handler.cc src/request_h
 add_library(static_handler_lib src/request_handler/static_handler.cc src/request_handler/request_handler.cc)
 add_library(api_handler_lib src/request_handler/api_handler.cc src/request_handler/request_handler.cc)
 add_library(sleep_handler_lib src/request_handler/sleep_handler.cc src/request_handler/request_handler.cc)
+add_library(health_handler_lib src/request_handler/health_handler.cc src/request_handler/request_handler.cc)
 add_library(mime_types_lib src/mime_types.cc)
 add_library(logger_lib src/logger.cc)
 add_library(handler_factory_lib src/request_handler_factory/request_handler_factory.cc)
@@ -56,6 +57,7 @@ add_library(echo_factory_lib src/request_handler_factory/echo_handler_factory.cc
 add_library(error_factory_lib src/request_handler_factory/error_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/error_handler.cc)
 add_library(api_factory_lib src/request_handler_factory/api_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/api_handler.cc)
 add_library(sleep_factory_lib src/request_handler_factory/sleep_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/sleep_handler.cc)
+add_library(health_factory_lib src/request_handler_factory/health_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/health_handler.cc)
 add_library(file_system_lib src/real_file_system.cc src/fake_file_system.cc)
 
 # set grouped lists of libraries
@@ -63,9 +65,9 @@ set(test_libs gtest_main gmock_main)
 set(logger_libs logger_lib Boost::log_setup Boost::log)
 set(handler_libs request_handler_delegate_lib 
     echo_handler_lib static_handler_lib api_handler_lib sleep_handler_lib
-    error_handler_lib mime_types_lib request_handler_lib file_system_lib)
+    error_handler_lib health_handler_lib mime_types_lib request_handler_lib file_system_lib)
 set(handler_factory_libs static_factory_lib echo_factory_lib api_factory_lib sleep_factory_lib
-    error_factory_lib handler_factory_lib file_system_lib)
+    error_factory_lib health_factory_lib handler_factory_lib file_system_lib)
 
 #Updated executable name, srcs, and deps
 add_executable(server src/server_main.cc)

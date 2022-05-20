@@ -4,6 +4,7 @@
 #include "request_handler_factory/static_handler_factory.h"
 #include "request_handler_factory/echo_handler_factory.h"
 #include "request_handler_factory/error_handler_factory.h"
+#include "request_handler_factory/health_handler_factory.h"
 
 class RequestHandlerDelegateTest : public ::testing::Test
 {
@@ -21,9 +22,11 @@ class RequestHandlerDelegateTest : public ::testing::Test
         std::shared_ptr<RequestHandlerFactory> static_factory(new StaticHandlerFactory(location, root_path));
 		std::shared_ptr<RequestHandlerFactory> echo_factory(new EchoHandlerFactory());
         std::shared_ptr<RequestHandlerFactory> error_factory(new ErrorHandlerFactory());
+        std::shared_ptr<RequestHandlerFactory> health_factory(new HealthHandlerFactory());
         factory_routes_.insert({location, static_factory}); // static mapping
         factory_routes_.insert({"/echo", echo_factory});
         factory_routes_.insert({"/", error_factory});
+        factory_routes_.insert({"/health", health_factory});
 		delegate.set_factory_routes(factory_routes_);
 	}
 };
@@ -58,6 +61,14 @@ TEST_F(RequestHandlerDelegateTest, ValidEchoRequest)
 TEST_F(RequestHandlerDelegateTest, ValidStaticRequest)
 {
 	char correct[] = "GET /static/file1.txt HTTP/1.1\r\n\r\n";
+	delegate.processRequest(correct, httpResponse, ip);
+	EXPECT_EQ(httpResponse.result_int(), 200);
+}
+
+// test for valid health request
+TEST_F(RequestHandlerDelegateTest, ValidHealthRequest)
+{
+	char correct[] = "GET /health HTTP/1.1\r\n\r\n";
 	delegate.processRequest(correct, httpResponse, ip);
 	EXPECT_EQ(httpResponse.result_int(), 200);
 }

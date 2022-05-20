@@ -268,10 +268,20 @@ function local_multithreading_test()
 	fi
 }
 
+function local_health_test()
+{
+	start_local_server
+	printf 'GET /health HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	sleep 0.5
+	kill ${local_server_pid} #nc process is killed when the server is killed
+	diff ${INTEGRATION_TEST_PATH}/expected_health /tmp/actual
+}
+
 # to add new tests, add name below
 test_list=(local_echo local_bad_request local_file_not_found
 	local_static_txt local_static_html local_static_zip
-	local_static_jpg local_static_png local_api local_multithreading)
+	local_static_jpg local_static_png local_api local_multithreading
+	local_health)
 
 # run setup commands
 run_setup
