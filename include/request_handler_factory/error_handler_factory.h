@@ -1,7 +1,7 @@
 #ifndef ERRORHANDLERFACTORY_H
 #define ERRORHANDLERFACTORY_H
 
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 class ErrorHandlerFactory : public RequestHandlerFactory 
 {

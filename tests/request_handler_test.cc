@@ -3,12 +3,12 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
-#include "request_handler.h"
-#include "echo_handler.h"
-#include "static_handler.h"
-#include "error_handler.h"
-#include "sleep_handler.h"
-#include "api_handler.h"
+#include "request_handler/request_handler.h"
+#include "request_handler/echo_handler.h"
+#include "request_handler/static_handler.h"
+#include "request_handler/error_handler.h"
+#include "request_handler/sleep_handler.h"
+#include "request_handler/api_handler.h"
 #include "fake_file_system.h"
 
 class RequestHandlerTest : public ::testing::Test

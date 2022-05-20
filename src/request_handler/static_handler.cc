@@ -2,8 +2,8 @@
 #include <string>
 #include <iostream>
 
-#include "request_handler.h"
-#include "static_handler.h"
+#include "request_handler/request_handler.h"
+#include "request_handler/static_handler.h"
 #include "mime_types.h"
 #include "logger.h"
 

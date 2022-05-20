@@ -1,10 +1,10 @@
 #include "request_handler_delegate.h"
 #include "logger.h"
-#include "request_handler.h"
-#include "static_handler.h"
-#include "echo_handler.h"
-#include "error_handler.h"
-#include "request_handler_factory.h"
+#include "request_handler/request_handler.h"
+#include "request_handler/static_handler.h"
+#include "request_handler/echo_handler.h"
+#include "request_handler/error_handler.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 bool parse_request(std::string httpRequestString, http::request<http::string_body>& httpRequest) 
 {

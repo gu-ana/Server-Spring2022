@@ -1,7 +1,7 @@
 #ifndef ECHOHANDLERFACTORY_H
 #define ECHOHANDLERFACTORY_H
 
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 class EchoHandlerFactory : public RequestHandlerFactory 
 {

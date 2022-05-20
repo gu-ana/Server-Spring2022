@@ -7,7 +7,7 @@
 namespace http = boost::beast::http;
 
 #include "session.h"
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 Session::Session(boost::asio::io_service& io_service, std::map<std::string, std::shared_ptr<RequestHandlerFactory>> factory_routes): socket_(io_service), factory_routes_(factory_routes) 
 {

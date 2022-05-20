@@ -1,7 +1,7 @@
 #ifndef STATICHANDLERFACTORY_H
 #define STATICHANDLERFACTORY_H
 
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 class StaticHandlerFactory : public RequestHandlerFactory 
 {

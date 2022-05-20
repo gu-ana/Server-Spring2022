@@ -6,7 +6,7 @@
 #include <boost/beast/http.hpp>
 #include <string>
 #include <map>
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 namespace http = boost::beast::http;
 

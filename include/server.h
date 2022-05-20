@@ -7,7 +7,7 @@
 
 #include "config_parser.h"
 #include "session.h"
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 using boost::asio::ip::tcp;
 
 

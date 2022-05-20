@@ -1,6 +1,6 @@
 
-#include "static_handler_factory.h"
-#include "static_handler.h"
+#include "request_handler_factory/static_handler_factory.h"
+#include "request_handler/static_handler.h"
 #include <iostream>
 
 StaticHandlerFactory::StaticHandlerFactory(std::string location, std::string root_path)

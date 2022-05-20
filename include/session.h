@@ -8,11 +8,11 @@
 
 #include "config_parser.h"
 #include "logger.h"
-#include "request_handler.h"
-#include "echo_handler.h"
-#include "static_handler.h"
+#include "request_handler/request_handler.h"
+#include "request_handler/echo_handler.h"
+#include "request_handler/static_handler.h"
 #include "request_handler_delegate.h"
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 using boost::asio::ip::tcp;
 namespace http = boost::beast::http;

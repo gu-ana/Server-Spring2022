@@ -1,7 +1,7 @@
 #ifndef STATICHANDLER_H 
 #define STATICHANDLER_H 
 
-#include "request_handler.h"
+#include "request_handler/request_handler.h"
 
 class StaticHandler: public RequestHandler 
 {

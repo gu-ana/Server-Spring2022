@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "session.h"
 #include "config_parser.h"
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 
 class SessionTest : public ::testing::Test
 {

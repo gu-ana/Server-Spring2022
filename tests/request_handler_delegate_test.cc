@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 #include "request_handler_delegate.h"
-#include "request_handler_factory.h"
-#include "static_handler_factory.h"
-#include "echo_handler_factory.h"
-#include "error_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
+#include "request_handler_factory/static_handler_factory.h"
+#include "request_handler_factory/echo_handler_factory.h"
+#include "request_handler_factory/error_handler_factory.h"
 
 class RequestHandlerDelegateTest : public ::testing::Test
 {

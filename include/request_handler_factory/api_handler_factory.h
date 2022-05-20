@@ -1,7 +1,7 @@
 #ifndef APIHANDLERFACTORY_H
 #define APIHANDLERFACTORY_H
 
-#include "request_handler_factory.h"
+#include "request_handler_factory/request_handler_factory.h"
 #include "file_system.h"
 
 class ApiHandlerFactory : public RequestHandlerFactory 
