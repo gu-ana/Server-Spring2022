@@ -1,7 +1,7 @@
 #include "sleep_handler.h"
 #include "logger.h"
 
-#define SLEEP_TIME 1000
+#define SLEEP_TIME 500
 
 bool SleepHandler::handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse)
 {   

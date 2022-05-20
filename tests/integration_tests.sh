@@ -241,10 +241,37 @@ function local_api_test()
 	
 }
 
+function local_multithreading_test()
+{
+	start_local_server
+	touch responses
+
+	curl -s -X GET http://localhost:${LOCAL_PORT_NUM}/sleep >> responses &
+	curl -s -X GET http://localhost:${LOCAL_PORT_NUM}/echo >> responses &
+	sleep 2
+
+	kill ${local_server_pid}
+
+	# get line number of echo response
+	echo_response=`cat responses | grep -n 'GET /echo' | grep -Po '^([0-9])+'`
+	# get line number of sleep response
+	sleep_response=`cat responses | grep -n 'Thread slept' | grep -Po '^([0-9])+'`
+
+	rm responses
+
+	# check if response for /echo was received before /sleep
+	if [[ $echo_response -lt $sleep_response ]]
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
 # to add new tests, add name below
 test_list=(local_echo local_bad_request local_file_not_found
 	local_static_txt local_static_html local_static_zip
-	local_static_jpg local_static_png local_api)
+	local_static_jpg local_static_png local_api local_multithreading)
 
 # run setup commands
 run_setup
