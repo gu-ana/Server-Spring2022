@@ -7,6 +7,7 @@
 #include "request_handler/echo_handler.h"
 #include "request_handler/static_handler.h"
 #include "request_handler/error_handler.h"
+#include "request_handler/bad_request_handler.h"
 #include "request_handler/sleep_handler.h"
 #include "request_handler/health_handler.h"
 #include "request_handler/api_handler.h"
@@ -41,6 +42,12 @@ class ErrorHandlerTest : public RequestHandlerTest
 {
 	protected:
 		ErrorHandler error_handler;
+};
+
+class BadRequestHandlerTest : public RequestHandlerTest
+{
+	protected:
+		BadRequestHandler bad_request_handler;
 };
 
 class StaticHandlerTest : public RequestHandlerTest
@@ -112,11 +119,22 @@ TEST_F(HealthHandlerTest, CorrectFormat)
 // test that ErrorHandler returns HTTP 404
 TEST_F(ErrorHandlerTest, HTTP404Response)
 {
-	char invalid_request[] = "blah";
+	char invalid_request[] = "GET / HTTP/1.1\r\n\r\n";
 	parse_request(invalid_request, httpRequest);
 	bool retVal = error_handler.handle_request(httpRequest, httpResponse);
 	EXPECT_TRUE(retVal);
 	EXPECT_EQ(httpResponse.result_int(), 404);
+	EXPECT_EQ(httpResponse.body(), "Could not handle request\n");
+}
+
+// test malformed request
+TEST_F(BadRequestHandlerTest, HTTP400Response)
+{
+	char invalid_request[] = "";
+	parse_request(invalid_request, httpRequest);
+	bool retVal = bad_request_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
 	EXPECT_EQ(httpResponse.body(), "Bad Request\n");
 }
 

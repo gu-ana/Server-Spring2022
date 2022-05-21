@@ -51,13 +51,13 @@ function local_echo_test()
 	diff ${INTEGRATION_TEST_PATH}/expected_echo /tmp/actual
 }
 
-function local_bad_request_test()
+function local_404_request_test()
 {
 	start_local_server
 	printf 'GET /echmo HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
 	sleep 0.5
 	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff ${INTEGRATION_TEST_PATH}/expected_bad_request /tmp/actual
+	diff ${INTEGRATION_TEST_PATH}/expected_404_request /tmp/actual
 }
 
 function local_file_not_found_test()
@@ -277,11 +277,20 @@ function local_health_test()
 	diff ${INTEGRATION_TEST_PATH}/expected_health /tmp/actual
 }
 
+function local_bad_request_test()
+{
+	start_local_server
+	printf 'GET /echo HTTP/1.1\r\n\r' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	sleep 0.5
+	kill ${local_server_pid} #nc process is killed when the server is killed
+	diff ${INTEGRATION_TEST_PATH}/expected_bad_request /tmp/actual
+}
+
 # to add new tests, add name below
-test_list=(local_echo local_bad_request local_file_not_found
+test_list=(local_echo local_404_request local_file_not_found
 	local_static_txt local_static_html local_static_zip
-	local_static_jpg local_static_png local_api local_multithreading
-	local_health)
+	local_static_jpg local_static_png local_api 
+	local_multithreading local_health local_bad_request)
 
 # run setup commands
 run_setup

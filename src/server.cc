@@ -12,6 +12,7 @@
 #include "request_handler_factory/error_handler_factory.h"
 #include "request_handler_factory/sleep_handler_factory.h"
 #include "request_handler_factory/health_handler_factory.h"
+#include "request_handler_factory/bad_request_handler_factory.h"
 #include "real_file_system.h"
 
 using boost::asio::ip::tcp;
@@ -82,6 +83,9 @@ void Server::create_factory_map()
     // create 404 (error) handler factory
     std::shared_ptr<RequestHandlerFactory> error_factory(new ErrorHandlerFactory());
     routes.insert({"/", error_factory});
+    // create 400 (error) handler factory
+    std::shared_ptr<RequestHandlerFactory> bad_request_factory(new BadRequestHandlerFactory());
+    routes.insert({"bad request", bad_request_factory});
 
     // for all parsed static locations in config, add mapping to routes
     auto filesystem_map = config_->get_filesystem_map();

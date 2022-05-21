@@ -4,6 +4,8 @@
 #include "request_handler/static_handler.h"
 #include "request_handler/echo_handler.h"
 #include "request_handler/error_handler.h"
+#include "request_handler/health_handler.h"
+#include "request_handler/bad_request_handler.h"
 #include "request_handler_factory/request_handler_factory.h"
 
 bool parse_request(std::string httpRequestString, http::request<http::string_body>& httpRequest) 
@@ -47,7 +49,8 @@ void RequestHandlerDelegate::processRequest(std::string request_string, http::re
     http::request<http::string_body> httpRequest; 
     if (!parse_request(request_string, httpRequest))
     {
-      LOG(info) << "HTTP response 404: Received bad request target\n";
+      LOG(info) << "HTTP response 400: Received malformed request\n";
+      matched_location_path = "bad request"; // matches to bad request handler
     }
     else 
     {
