@@ -192,6 +192,7 @@ TEST_F(NginxConfigParserTest, blockConfigToString)
     EXPECT_STREQ(config_string.c_str(), expect_string.c_str());
 }
 
+// test ignored trailing slashes
 TEST_F(NginxConfigParserTest, trailingSlashes)
 {
   bool success = parser.Parse("./parser_tests/trailing_slashes_config", &out_config);
@@ -203,4 +204,18 @@ TEST_F(NginxConfigParserTest, trailingSlashes)
   expected.insert({"/static/", "./files"});
   expected.insert({"/static2/", "./files/www"});
   EXPECT_EQ(map["StaticHandler"], expected);
+}
+
+// test config file that can't be opened
+TEST_F(NginxConfigParserTest, FailedOpen)
+{
+  bool fail = parser.Parse("./parser_tests/does_not_exist_config", &out_config);
+  EXPECT_FALSE(fail);
+}
+
+// test that absolute paths are rejected
+TEST_F(NginxConfigParserTest, AbsolutePath)
+{
+  bool fail = parser.Parse("./parser_tests/absolutepath_config", &out_config);
+  EXPECT_FALSE(fail);
 }

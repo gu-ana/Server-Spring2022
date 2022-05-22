@@ -50,6 +50,7 @@ int Session::handle_read(const boost::system::error_code& error,
   else
   {
     delete this;
+    return 1;
   }
   return 0;
 }
@@ -67,6 +68,7 @@ int Session::handle_write(const boost::system::error_code& error)
   else
   {
     delete this;
+    return 1;
   }
   return 0;
 }

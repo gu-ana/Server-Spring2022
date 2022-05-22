@@ -172,6 +172,35 @@ TEST_F(StaticHandlerTest, FileNotFound)
 	EXPECT_EQ(httpResponse.body(), "File not found\n");
 }
 
+// API has non-numeric ID
+TEST_F(ApiHandlerTest, ApiNonNumericID)
+{
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+
+	char get_file[] = "GET /api/shoes/words HTTP/1.1\r\n\r\n";
+	parse_request(get_file, httpRequest);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Requested file must be a number\n");
+}
+
+// API given undefined method
+TEST_F(ApiHandlerTest, APIUndefinedMethod)
+{
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::trace);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Invalid HTTP method\n");
+}
+
 // POST finds correct next available ID and returns {"id": <ID>} in the response
 TEST_F(ApiHandlerTest, ApiPOSTReturnID)
 {
@@ -201,6 +230,22 @@ TEST_F(ApiHandlerTest, ApiPOSTCreateFile)
 	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
 	EXPECT_TRUE(retVal);
 	EXPECT_TRUE(ffs->exists("./mnt/crud/shoes/1"));
+}
+
+// POST request has more than just entity
+TEST_F(ApiHandlerTest, ApiPOSTInvalidTarget)
+{
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes/1");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_FALSE(ffs->exists("./mnt/crud/shoes/1"));
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for POST\n");
 }
 
 // GET reads file at data_path/entity/id and returns it
@@ -241,6 +286,58 @@ TEST_F(ApiHandlerTest, ApiGETFileNotFound)
 	EXPECT_EQ(httpResponse.body(), "Requested ID does not exist\n");
 }
 
+// GET request has more than entity and ID
+TEST_F(ApiHandlerTest, ApiGETInvalidTarget)
+{
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	api_handler.handle_request(httpRequest, httpResponse);
+
+	char invalid_target[] = "GET /api/shoes/1/2 HTTP/1.1\r\n\r\n";
+	parse_request(invalid_target, httpRequest);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for GET\n");
+}
+
+// List: GET returns list of IDs in entity/
+TEST_F(ApiHandlerTest, ApiGETList)
+{
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+
+	char get_list[] = "GET /api/shoes HTTP/1.1\r\n\r\n";
+	parse_request(get_list, httpRequest);
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.body(), "[1, 2]");
+}
+
+// List: GET /api/entity for invalid entity
+TEST_F(ApiHandlerTest, ApiGETEntityNotFound)
+{
+	httpRequest.method(http::verb::get);
+	httpRequest.target("/api/shoes");
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.body(), "Invalid entity requested\n");
+}
+
 // PUT body was successfully written to new data_path/entity/id
 TEST_F(ApiHandlerTest, ApiPUTNewFile)
 {
@@ -270,10 +367,34 @@ TEST_F(ApiHandlerTest, ApiPUTUpdateFile)
 	std::string new_content = "{\"data\": 2}";
 	httpRequest.method(http::verb::put);
 	httpRequest.target("/api/shoes/1");
-	httpRequest.body() = content;
+	httpRequest.body() = new_content;
 	retVal = api_handler.handle_request(httpRequest, httpResponse);
 	EXPECT_TRUE(retVal);
 	EXPECT_TRUE(ffs->exists("./mnt/crud/shoes/1"));
+}
+
+// PUT is given only entity, or more than entity and ID
+TEST_F(ApiHandlerTest, ApiPUTInvalidTarget)
+{
+	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
+	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+
+	std::string content = "{\"data\": 1}";
+	httpRequest.method(http::verb::put);
+	httpRequest.target("/api/shoes");
+	httpRequest.body() = content;
+	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for PUT\n");
+
+	httpRequest.method(http::verb::put);
+	httpRequest.target("/api/shoes/1/2");
+	httpRequest.body() = content;
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for PUT\n");
 }
 
 // DELETE removes the file at data_path/entity/id
@@ -316,34 +437,23 @@ TEST_F(ApiHandlerTest, ApiDELETEFileNotFound)
 	EXPECT_EQ(httpResponse.body(), "Could not delete requested ID\n");
 }
 
-TEST_F(ApiHandlerTest, ApiGETList)
+// DELETE has only entity, or more than entity and ID
+TEST_F(ApiHandlerTest, ApiDELETEInvalidTarget)
 {
-	std::string content = "{\"data\": 1}";
-	httpRequest.method(http::verb::post);
-	httpRequest.target("/api/shoes");
-	httpRequest.body() = content;
 	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
 	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
-	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
-	EXPECT_TRUE(retVal);
-	retVal = api_handler.handle_request(httpRequest, httpResponse);
-	EXPECT_TRUE(retVal);
 
-	char get_list[] = "GET /api/shoes HTTP/1.1\r\n\r\n";
-	parse_request(get_list, httpRequest);
-	retVal = api_handler.handle_request(httpRequest, httpResponse);
-	EXPECT_TRUE(retVal);
-	EXPECT_EQ(httpResponse.body(), "[1, 2]");
-}
-
-// List: GET /api/entity for invalid entity
-TEST_F(ApiHandlerTest, ApiGETEntityNotFound)
-{
-	httpRequest.method(http::verb::get);
+	httpRequest.method(http::verb::delete_);
 	httpRequest.target("/api/shoes");
-	std::shared_ptr<FileSystem> ffs(new FakeFileSystem());
-	api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
 	bool retVal = api_handler.handle_request(httpRequest, httpResponse);
 	EXPECT_FALSE(retVal);
-	EXPECT_EQ(httpResponse.body(), "Invalid entity requested\n");
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for DELETE\n");
+
+	httpRequest.method(http::verb::delete_);
+	httpRequest.target("/api/shoes/1/2");
+	retVal = api_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for DELETE\n");
 }

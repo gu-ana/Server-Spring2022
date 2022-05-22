@@ -93,12 +93,15 @@ add_executable(request_handler_delegate_test tests/request_handler_delegate_test
 target_link_libraries(request_handler_delegate_test ${handler_libs} ${logger_libs} 
 ${handler_factory_libs} ${test_libs} Boost::filesystem)
 
+add_executable(server_test tests/server_test.cc)
+target_link_libraries(server_test server_lib session_lib config_parser_lib ${handler_libs} ${logger_libs} ${handler_factory_libs} Boost::filesystem Boost::system Threads::Threads ${test_libs})
+
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_handler_delegate_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-# gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 
 # Add integration tests
@@ -107,5 +110,5 @@ add_test(NAME IntegrationTests COMMAND integration_tests.sh WORKING_DIRECTORY ${
 #Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(TARGETS server server_lib session_lib config_parser_lib ${handler_libs}
-                         TESTS config_parser_test session_test 
+                         TESTS config_parser_test session_test server_test 
                          request_handler_test request_handler_delegate_test)

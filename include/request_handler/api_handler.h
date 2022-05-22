@@ -13,7 +13,6 @@ class ApiHandler: public RequestHandler
         std::string data_path_;
         std::string location_;
         std::shared_ptr<FileSystem> fs_;
-        std::string extractFileContents(std::string fileName);
         bool handlePost(std::vector<std::string> uri, http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse);
         bool handleGet(std::vector<std::string> uri, http::response<http::string_body>& httpResponse); 
         bool handleDelete(std::vector<std::string> uri, http::response<http::string_body>& httpResponse); 

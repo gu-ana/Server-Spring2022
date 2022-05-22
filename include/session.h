@@ -23,11 +23,11 @@ class Session {
     public:
         // functions
         Session(boost::asio::io_service& io_service, std::map<std::string, std::shared_ptr<RequestHandlerFactory>> factory_routes);
-        void start();
-        tcp::socket& socket();
-        std::string getSocketEndpoint();
-        int handle_read(const boost::system::error_code& error, size_t bytes_transferred);
-        int handle_write(const boost::system::error_code& error);
+        virtual void start();
+        virtual tcp::socket& socket();
+        virtual std::string getSocketEndpoint();
+        virtual int handle_read(const boost::system::error_code& error, size_t bytes_transferred);
+        virtual int handle_write(const boost::system::error_code& error);
     private:
         // vars
         tcp::socket socket_;

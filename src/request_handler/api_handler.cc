@@ -74,14 +74,6 @@ bool ApiHandler::handlePost(vector<std::string> uri, http::request<http::string_
     }
 }
 
-std::string ApiHandler::extractFileContents(std::string fileName)
-{
-    std::string file_contents;
-    boost::filesystem::path filePath(fileName);
-    fs_->read_file(fileName, file_contents);
-    return file_contents;
-}
-
 bool ApiHandler::handleGet(vector<std::string> uri, http::response<http::string_body>& httpResponse) 
 {
     std::string filePath = data_path_ + "/" + extractEntity(uri);
@@ -247,6 +239,8 @@ bool ApiHandler::handle_request(http::request<http::string_body> httpRequest, ht
     }
     else
     {
+        LOG(error) << "Invalid HTTP method\n";
+        set_response(http::status::bad_request, "text/plain", "Invalid HTTP method\n", httpResponse);
         return false;
     }
 }
