@@ -15,3 +15,8 @@ bool SleepHandler::handle_request(http::request<http::string_body> httpRequest, 
 
     return true;
 }
+
+std::string SleepHandler::getName()
+{
+    return std::string("SleepHandler");
+}

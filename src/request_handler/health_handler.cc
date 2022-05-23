@@ -7,3 +7,8 @@ bool HealthHandler::handle_request(http::request<http::string_body> httpRequest,
 
     return true;
 }
+
+std::string HealthHandler::getName()
+{
+    return std::string("HealthHandler");
+}

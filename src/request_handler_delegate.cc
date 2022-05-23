@@ -49,7 +49,6 @@ void RequestHandlerDelegate::processRequest(std::string request_string, http::re
     http::request<http::string_body> httpRequest; 
     if (!parse_request(request_string, httpRequest))
     {
-      LOG(info) << "HTTP response 400: Received malformed request\n";
       matched_location_path = "bad request"; // matches to bad request handler
     }
     else 
@@ -67,11 +66,19 @@ void RequestHandlerDelegate::processRequest(std::string request_string, http::re
     bool status = handler->handle_request(httpRequest, httpResponse);
     if (status) 
     {
-        LOG(info) << "Successfully handled request from: " << endpoint << "\n";
+        LOG(info) << "[ResponseMetric] ResponseCode: " << std::to_string(httpResponse.result_int()) 
+                                  << " RequestPath: " << httpRequest.target()
+                                  << " MatchedRequestHandler: " << handler->getName()
+                                  << " RequestIP: " << endpoint
+                                  << " Message: Successfully handled request.\n";        
     }
     else 
     {
-        LOG(info) << "Unable to handle request from: " << endpoint << "\n";
+        LOG(info) << "[ResponseMetric] ResponseCode: " << std::to_string(httpResponse.result_int())
+                                  << " RequestPath: " << httpRequest.target()
+                                  << " MatchedRequestHandler: " << handler->getName()
+                                  << " RequestIP: " << endpoint
+                                  << " Message: Unable to handle request.\n";     
     }
 
     delete handler;

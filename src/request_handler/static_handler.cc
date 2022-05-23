@@ -54,3 +54,8 @@ bool StaticHandler::handle_request(http::request<http::string_body> httpRequest,
     
     return true;
 }
+
+std::string StaticHandler::getName()
+{
+    return std::string("StaticHandler");
+}

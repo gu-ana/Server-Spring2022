@@ -14,6 +14,7 @@ class RequestHandler
 {
     public:
         virtual bool handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse) = 0;
+        virtual std::string getName() = 0;
     
     //protected because we want the derived classes to have access
     protected:

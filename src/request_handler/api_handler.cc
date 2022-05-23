@@ -15,6 +15,11 @@ using namespace std;
 ApiHandler::ApiHandler(std::string location, std::string data_path, std::shared_ptr<FileSystem> fs)
     :location_(location), data_path_(data_path), fs_(fs){}
 
+std::string ApiHandler::getName()
+{
+    return std::string("ApiHandler");
+}
+
 // split function helps break up the uri into more manageable parts
 vector<string> split(const string &s, char delim) 
 {

@@ -6,3 +6,8 @@ bool BadRequestHandler::handle_request(http::request<http::string_body> httpRequ
     set_response(http::status::bad_request, "text/plain", "Bad Request\n", httpResponse);
     return true;
 }
+
+std::string BadRequestHandler::getName()
+{
+    return std::string("BadRequestHandler");
+}

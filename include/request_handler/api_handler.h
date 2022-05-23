@@ -9,6 +9,7 @@ class ApiHandler: public RequestHandler
     public:
         ApiHandler(std::string location, std::string data_path, std::shared_ptr<FileSystem> fs);
         bool handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse);
+        std::string getName();
     private:
         std::string data_path_;
         std::string location_;

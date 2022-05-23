@@ -10,3 +10,8 @@ bool EchoHandler::handle_request(http::request<http::string_body> httpRequest, h
 
     return true;
 }
+
+std::string EchoHandler::getName()
+{
+    return std::string("EchoHandler");
+}

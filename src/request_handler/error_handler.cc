@@ -6,3 +6,8 @@ bool ErrorHandler::handle_request(http::request<http::string_body> httpRequest, 
     set_response(http::status::not_found, "text/plain", "Could not handle request\n", httpResponse);
     return true;
 }
+
+std::string ErrorHandler::getName()
+{
+    return std::string("ErrorHandler");
+}
