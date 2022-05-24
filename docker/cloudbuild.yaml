@@ -30,5 +30,5 @@ steps:
     '-t', 'gcr.io/$PROJECT_ID/swan:coverage',
     '.'
   ]
-timeout: 1200s
+timeout: 1500s
 images: ['gcr.io/$PROJECT_ID/swan:base', 'gcr.io/$PROJECT_ID/swan:latest', 'gcr.io/$PROJECT_ID/swan:coverage']

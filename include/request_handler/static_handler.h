@@ -8,7 +8,7 @@ class StaticHandler: public RequestHandler
     public:
         StaticHandler(std::string location, std::string root_file_path);
         bool handle_request(http::request<http::string_body> httpRequest, http::response<http::string_body>& httpResponse);
-        std::string getName();
+        std::string getName() override;
     private:
         std::string location_;
         std::string root_file_path_;
