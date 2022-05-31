@@ -80,12 +80,12 @@ set(handler_factory_libs static_factory_lib echo_factory_lib api_factory_lib sle
     error_factory_lib health_factory_lib palette_factory_lib handler_factory_lib file_system_lib)
 
 # Link libraries
-target_link_libraries(palette_api_lib ${CURLPP_LDFLAGS} ${logger_libs})
+target_link_libraries(palette_api_lib ${CURLPP_LDFLAGS} ${logger_libs} Boost::boost)
 target_link_libraries(palette_handler_lib palette_api_lib)
 
 #Updated executable name, srcs, and deps
 add_executable(server src/server_main.cc)
-target_link_libraries(server server_lib session_lib config_parser_lib ${handler_libs} ${logger_libs} ${handler_factory_libs} Boost::filesystem Boost::system Threads::Threads)
+target_link_libraries(server server_lib session_lib config_parser_lib ${handler_libs} ${logger_libs} ${handler_factory_libs} Boost::filesystem Boost::system Boost::boost Threads::Threads)
 
 add_executable(config_parser src/config_parser_main.cc)
 target_link_libraries(config_parser config_parser_lib ${logger_libs})
