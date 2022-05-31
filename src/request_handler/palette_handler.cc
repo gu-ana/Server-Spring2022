@@ -1,13 +1,13 @@
 #include "request_handler/palette_handler.h"
 #include "logger.h"
 #include <algorithm>
- 
+
 const std::string WHITESPACE = " \n";
  
 std::string trim_whitespace(const std::string &s) 
 {
     std::string s_trimmed;
-    
+
     // remove whitespaces at start of string
     size_t start = s.find_first_not_of(WHITESPACE);
     s_trimmed = (start == std::string::npos) ? "" : s.substr(start);
@@ -80,15 +80,15 @@ bool PaletteHandler::handle_request(http::request<http::string_body> httpRequest
     // extract and sanitize request body
     std::string body = std::string(httpRequest.body());
     body = trim_whitespace(body);
-    if (!valid_input(body)) 
+    if (!valid_input(body))
     {
         LOG(error) << "Invalid request body\n";
         set_response(http::status::bad_request, "text/html", "Request body can only contain letters, numbers, and spaces\n", httpResponse);
         return false;
     }
 
-    std::vector<std::string> colors = {"#355070", "#6D597A", "#B56576", "#E56B6F", "#EAAC8B"};
-    std::vector<std::string> colorNames = {"Dark Blue", "Some Purple", "Mauve?", "Pink", "Peach"};
+    std::vector<std::string> colors = PaletteAPI::get_colors(body);
+    std::vector<std::string> colorNames = PaletteAPI::get_names(colors);
     std::string jsonBody = generate_json_response(colors, colorNames);
 
     // send response
