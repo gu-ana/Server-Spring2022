@@ -1,12 +1,13 @@
 server {
-  listen   3000;
+  listen   8000;
 
   location /static/help/ StaticHandler{
     root ./files/images;
   }
-  location /static/ StaticHandler {
-    root ./files;
+   location /static/ StaticHandler {
+    root ./frontend/build/static;
   }
+  
   location /static2/ StaticHandler {
     root ./files/www;
   }

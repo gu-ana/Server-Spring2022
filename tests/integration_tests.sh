@@ -37,6 +37,7 @@ function start_local_server()
 	../build/bin/server local_test_config &>/dev/null &
 	local_server_pid=$!
 	sleep 1
+	cat /dev/null
 }
 
 # testing functions
