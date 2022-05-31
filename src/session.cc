@@ -45,7 +45,6 @@ int Session::handle_read(const boost::system::error_code& error,
 
     http::async_write(socket_, httpResponse_, boost::bind(&Session::handle_write, this,
                                 boost::asio::placeholders::error));
-    LOG(info) << "HTTP response sent to client at " << socket_.remote_endpoint()  << "\n";
   }
   else
   {

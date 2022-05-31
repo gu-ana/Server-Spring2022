@@ -32,9 +32,14 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.50 REQUIRED COMPONENTS system filesystem log_setup log)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
+# Finding packages for cURLpp
+# Source: https://github.com/guimauveb/cmake-find-curlpp
+include(FindPkgConfig)
+pkg_check_modules(CURLPP REQUIRED curlpp)
+
 include_directories(include)
 
-# require pthreads 
+# require pthreads
 find_package(Threads REQUIRED)
 
 # add libraries
