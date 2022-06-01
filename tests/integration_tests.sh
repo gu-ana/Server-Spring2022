@@ -70,51 +70,6 @@ function local_file_not_found_test()
 	diff ${INTEGRATION_TEST_PATH}/expected_not_found /tmp/actual
 }
 
-function local_static_txt_test()
-{
-	start_local_server
-	printf 'GET /static/file1.txt HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 0.5
-	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff ${INTEGRATION_TEST_PATH}/expected_txt /tmp/actual
-}
-
-function local_static_html_test()
-{
-	start_local_server
-	printf 'GET /static/index.html HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 0.5
-	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff ${INTEGRATION_TEST_PATH}/expected_html /tmp/actual
-}
-
-function local_static_zip_test()
-{
-	start_local_server
-	printf 'GET /static2/empty.zip HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 0.5
-	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff ${INTEGRATION_TEST_PATH}/expected_zip /tmp/actual
-}
-
-function local_static_jpg_test()
-{
-	start_local_server
-	printf 'GET /static/help/nyan_cat.jpg HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 0.5
-	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff ${INTEGRATION_TEST_PATH}/expected_jpg /tmp/actual
-}
-
-function local_static_png_test()
-{
-	start_local_server
-	printf 'GET /static/help/hutao.png HTTP/1.1\r\n\r\n' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
-	sleep 0.5
-	kill ${local_server_pid} #nc process is killed when the server is killed
-	diff ${INTEGRATION_TEST_PATH}/expected_png /tmp/actual
-}
-
 function local_api_test()
 {
 	mkdir ${API_TEST_PATH}
@@ -318,10 +273,8 @@ function local_invalid_palette_test()
 
 # to add new tests, add name below
 test_list=(local_echo local_404_request local_file_not_found
-	local_static_txt local_static_html local_static_zip
-	local_static_jpg local_static_png local_api 
-	local_multithreading local_health local_bad_request local_palette 
-	local_invalid_palette)
+	local_api 
+	local_multithreading local_health local_bad_request)
 
 # run setup commands
 run_setup

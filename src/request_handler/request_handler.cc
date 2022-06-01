@@ -11,5 +11,6 @@ void RequestHandler::set_response(boost::beast::http::status status, std::string
   httpResponse.result(status);
   httpResponse.set(http::field::content_type, content_type);
   httpResponse.body() = body;
+  httpResponse.set("Access-Control-Allow-Origin", "*");
   httpResponse.prepare_payload();
 }
