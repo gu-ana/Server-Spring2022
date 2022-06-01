@@ -52,10 +52,10 @@ std::string generate_json_response(std::vector<std::string> colors, std::vector<
         jsonResponse << "\"Color" << i << "\":\n";
         jsonResponse << "{\n";
         jsonResponse << "\"hex\":" << "\"" << colors[i] << "\", ";
-        jsonResponse << "\"name\":" << "\"" << colorNames[i] << "\",\n";
-        jsonResponse << "},\n";
+        jsonResponse << "\"name\":" << "\"" << colorNames[i] << "\"\n";
+        jsonResponse << "}\n";
     }
-    jsonResponse << "},\n";
+    jsonResponse << "}\n";
 
     jsonResponse << "}\n";
 

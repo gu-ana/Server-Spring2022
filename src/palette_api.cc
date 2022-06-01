@@ -12,7 +12,6 @@
 #include <curlpp/Options.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#define HEX_START 22
 #define HEX_LENGTH 7
 
 using namespace curlpp::options;
@@ -30,7 +29,32 @@ std::string parse_json(std::string json)
     return name.get<std::string>("value");
 }
 
-// TODO: currently only returns one color
+// Parse string containing html for a specified palette
+std::vector<std::string> parse_html(std::string html)
+{
+    std::string palette = "Classy Palette";
+    std::string color_div = "<div class='color' style='background:";
+    std::size_t find_start_palette = html.find("Classy Palette");
+    std::size_t find_end_palette = html.find("<div class='color-palette js-sr-palette'>", find_start_palette);
+
+    std::vector<std::string> colors;
+
+    // Search through html for all colors associated with palette
+    if (find_start_palette != std::string::npos && find_end_palette != std::string::npos)
+    {
+        std::size_t find_color = find_start_palette;
+
+        // Stop finding colors when done with current palette
+        while ((find_color = html.find(color_div, find_color)) != std::string::npos && find_color < find_end_palette)
+        {
+            colors.push_back(html.substr(find_color + color_div.size(), HEX_LENGTH));
+            find_color += color_div.size();
+        }
+    }
+
+    return colors;
+}
+
 std::vector<std::string> PaletteAPI::get_colors(std::string word)
 {
     std::vector<std::string> colors;
@@ -48,10 +72,27 @@ std::vector<std::string> PaletteAPI::get_colors(std::string word)
         os << Url(url.str());
 
         // Extract hex value from web page
-        std::size_t found = os.str().find("\"selectText('.hex');\">");
-        std::string color = os.str().substr(found + HEX_START, HEX_LENGTH);
+        std::string hex_div = "\"selectText('.hex');\">";
+        std::size_t found = os.str().find(hex_div);
 
-        colors.push_back(color);
+        if (found != std::string::npos)
+        {
+            std::string color = os.str().substr(found + hex_div.size(), HEX_LENGTH);
+
+            // Extract palette given one color
+            std::ostringstream url2;
+            url2 << "https://mycolor.space/?hex=%23" << color.substr(1) << "&sub=1";
+
+            std::ostringstream os2;
+            os2 << Url(url2.str());
+
+            colors = parse_html(os2.str());
+        }
+        else
+        {
+            LOG(error) << "No colors found for " << word << "\n";
+            return colors;
+        }
     }
     catch (curlpp::RuntimeError &e)
     {
@@ -65,7 +106,6 @@ std::vector<std::string> PaletteAPI::get_colors(std::string word)
     return colors;
 }
 
-// TODO: currently outputs json, will need to be parsed
 std::vector<std::string> PaletteAPI::get_names(std::vector<std::string> hexColors)
 {
     std::vector<std::string> colorNames;
