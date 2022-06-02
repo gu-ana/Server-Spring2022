@@ -45,16 +45,19 @@ std::string generate_json_response(std::vector<std::string> colors, std::vector<
     jsonResponse << "{\n";
     
     // Palette
-    jsonResponse << "\"Palette\": {\n";
+    jsonResponse << "\"Palette\": {";
 
     for (int i = 0; i < colors.size(); i++) 
     {
+        jsonResponse << "\n";
         jsonResponse << "\"Color" << i << "\":\n";
         jsonResponse << "{\n";
         jsonResponse << "\"hex\":" << "\"" << colors[i] << "\", ";
         jsonResponse << "\"name\":" << "\"" << colorNames[i] << "\"\n";
-        jsonResponse << "}\n";
+        jsonResponse << "},";
     }
+    // remove trailing comma
+    jsonResponse.seekp(-1, jsonResponse.cur);
     jsonResponse << "}\n";
 
     jsonResponse << "}\n";
@@ -89,6 +92,14 @@ bool PaletteHandler::handle_request(http::request<http::string_body> httpRequest
 
     std::vector<std::string> colors = PaletteAPI::get_colors(body);
     std::vector<std::string> colorNames = PaletteAPI::get_names(colors);
+
+    if (colors.empty() || colorNames.empty())
+    {
+        LOG(error) << "API calls for palette failed, informing client\n";
+        set_response(http::status::internal_server_error, "text/plain", "Unable to generate palette.", httpResponse);
+        return false;
+    }
+
     std::string jsonBody = generate_json_response(colors, colorNames);
 
     // send response

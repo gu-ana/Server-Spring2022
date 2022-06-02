@@ -167,10 +167,12 @@ std::vector<std::string> PaletteAPI::get_names(std::vector<std::string> hex_colo
     catch (curlpp::RuntimeError &e)
     {
         LOG(error) << "While getting name of colors: " << e.what() << "\n";
+        return {};
     }
     catch (curlpp::LogicError &e)
     {
         LOG(error) << "While getting name of colors: " << e.what() << "\n";
+        return {};
     }
 
     return colorNames;
