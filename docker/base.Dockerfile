@@ -18,4 +18,5 @@ RUN apt-get update && apt-get install -y \
     gcovr \
     pkg-config \
     libcurlpp-dev \
-    libcurl4-openssl-dev
+    libcurl4-openssl-dev \
+    jq

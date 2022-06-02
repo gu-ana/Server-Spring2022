@@ -287,11 +287,41 @@ function local_bad_request_test()
 	diff ${INTEGRATION_TEST_PATH}/expected_bad_request /tmp/actual
 }
 
+function local_palette_test()
+{
+	start_local_server
+	
+	request_body='hello world'
+	post_res="$(curl -s -X POST http://localhost:${LOCAL_PORT_NUM}/palette -d $request_body)"
+	
+	kill ${local_server_pid}
+
+	if jq -e . >/dev/null 2>&1 <<< $post_res; 
+	then
+    	# sucessfully parsed JSON
+		return 0
+	else
+		# JSON parsing unsuccessful
+		return 1
+	fi
+}
+
+function local_invalid_palette_test()
+{
+	start_local_server
+	
+	printf 'GET /palette HTTP/1.1\r\n\r' | nc localhost ${LOCAL_PORT_NUM} > /tmp/actual &
+	
+	kill ${local_server_pid}
+	diff ${INTEGRATION_TEST_PATH}/expected_error_palette /tmp/actual
+}
+
 # to add new tests, add name below
 test_list=(local_echo local_404_request local_file_not_found
 	local_static_txt local_static_html local_static_zip
 	local_static_jpg local_static_png local_api 
-	local_multithreading local_health local_bad_request)
+	local_multithreading local_health local_bad_request local_palette 
+	local_invalid_palette)
 
 # run setup commands
 run_setup
