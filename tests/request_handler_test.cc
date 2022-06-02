@@ -11,6 +11,7 @@
 #include "request_handler/sleep_handler.h"
 #include "request_handler/health_handler.h"
 #include "request_handler/api_handler.h"
+#include "request_handler/palette_handler.h"
 #include "fake_file_system.h"
 
 class RequestHandlerTest : public ::testing::Test
@@ -66,6 +67,12 @@ class ApiHandlerTest : public RequestHandlerTest
 	protected:
 		std::shared_ptr<FileSystem> ffs;
 		ApiHandler api_handler = ApiHandler("/api/", "./mnt/crud", ffs);
+};
+
+class PaletteHandlerTest : public RequestHandlerTest
+{
+	protected:
+		PaletteHandler palette_handler;
 };
 
 // helper function to set http::request objects
@@ -456,4 +463,49 @@ TEST_F(ApiHandlerTest, ApiDELETEInvalidTarget)
 	EXPECT_FALSE(retVal);
 	EXPECT_EQ(httpResponse.result_int(), 400);
 	EXPECT_EQ(httpResponse.body(), "Not a valid API request target for DELETE\n");
+}
+
+TEST_F(PaletteHandlerTest, PaletteValidRequest)
+{
+	std::string content = "hello world";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/palette");
+	httpRequest.body() = content;
+	bool retVal = palette_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_TRUE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 200);
+}
+
+TEST_F(PaletteHandlerTest, PaletteInvalidMethod)
+{
+	std::string content = "hello world";
+	httpRequest.method(http::verb::get);
+	httpRequest.target("/palette");
+	httpRequest.body() = content;
+	bool retVal = palette_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Invalid HTTP method for target\n");
+}
+
+TEST_F(PaletteHandlerTest, PaletteEmptyBody)
+{
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/palette");
+	bool retVal = palette_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Request body should be non-empty and can only contain letters, numbers, and spaces\n");
+}
+
+TEST_F(PaletteHandlerTest, PaletteInvalidBody)
+{
+	std::string content = "/hello world/";
+	httpRequest.method(http::verb::post);
+	httpRequest.target("/palette");
+	httpRequest.body() = content;
+	bool retVal = palette_handler.handle_request(httpRequest, httpResponse);
+	EXPECT_FALSE(retVal);
+	EXPECT_EQ(httpResponse.result_int(), 400);
+	EXPECT_EQ(httpResponse.body(), "Request body should be non-empty and can only contain letters, numbers, and spaces\n");
 }

@@ -86,7 +86,7 @@ bool PaletteHandler::handle_request(http::request<http::string_body> httpRequest
     if (!valid_input(body))
     {
         LOG(error) << "Invalid request body\n";
-        set_response(http::status::bad_request, "text/html", "Request body can only contain letters, numbers, and spaces\n", httpResponse);
+        set_response(http::status::bad_request, "text/html", "Request body should be non-empty and can only contain letters, numbers, and spaces\n", httpResponse);
         return false;
     }
 
