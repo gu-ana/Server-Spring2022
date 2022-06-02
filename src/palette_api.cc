@@ -55,9 +55,40 @@ std::vector<std::string> parse_html(std::string html)
     return colors;
 }
 
-std::vector<std::string> PaletteAPI::get_colors(std::string word)
+// Call API to get palette given a color
+std::vector<std::string> get_palette(std::string color)
 {
-    std::vector<std::string> colors;
+    std::vector<std::string> palette;
+
+    try
+    {
+        curlpp::Cleanup myCleanup;
+
+        std::ostringstream url;
+        url << "https://mycolor.space/?hex=%23" << color << "&sub=1";
+
+        std::ostringstream os;
+        os << Url(url.str());
+
+        palette = parse_html(os.str());
+    }
+    catch (curlpp::RuntimeError &e)
+    {
+        LOG(error) << "While getting palette from " << color << ": " << e.what() << "\n";
+    }
+    catch (curlpp::LogicError &e)
+    {
+        LOG(error) << "While getting palette from " << color << ": " << e.what() << "\n";
+    }
+
+    return palette;
+}
+
+// Call API to get color given a word
+std::string get_color(std::string word)
+{
+    std::string color;
+
     try
     {
         curlpp::Cleanup myCleanup;
@@ -77,46 +108,53 @@ std::vector<std::string> PaletteAPI::get_colors(std::string word)
 
         if (found != std::string::npos)
         {
-            std::string color = os.str().substr(found + hex_div.size(), HEX_LENGTH);
-
-            // Extract palette given one color
-            std::ostringstream url2;
-            url2 << "https://mycolor.space/?hex=%23" << color.substr(1) << "&sub=1";
-
-            std::ostringstream os2;
-            os2 << Url(url2.str());
-
-            colors = parse_html(os2.str());
+            color = os.str().substr(found + hex_div.size() + 1, HEX_LENGTH - 1);
         }
         else
         {
             LOG(error) << "No colors found for " << word << "\n";
-            return colors;
         }
     }
     catch (curlpp::RuntimeError &e)
     {
-        LOG(error) << "While getting color of " << word << " : " << e.what() << "\n";
+        LOG(error) << "While getting color of " << word << ": " << e.what() << "\n";
     }
     catch (curlpp::LogicError &e)
     {
-        LOG(error) << "While getting color of " << word << " : " << e.what() << "\n";
+        LOG(error) << "While getting color of " << word << ": " << e.what() << "\n";
     }
 
-    return colors;
+    return color;
 }
 
-std::vector<std::string> PaletteAPI::get_names(std::vector<std::string> hexColors)
+std::vector<std::string> PaletteAPI::get_colors(std::string word)
+{
+    // Get color from word to color API
+    std::string color = get_color(word);
+
+    // Get palette from color, if it existed
+    if (color == "")
+    {
+        return {};
+    }
+    else
+    {
+        return get_palette(color);
+    }
+}
+
+// Call API to get names of colors
+std::vector<std::string> PaletteAPI::get_names(std::vector<std::string> hex_colors)
 {
     std::vector<std::string> colorNames;
     try
     {
         curlpp::Cleanup myCleanup;
 
-        for (int i = 0; i < hexColors.size(); i++)
+        for (int i = 0; i < hex_colors.size(); i++)
         {
             std::ostringstream url;
-            url << "https://www.thecolorapi.com/id?hex=" << hexColors[i].substr(1);
+            url << "https://www.thecolorapi.com/id?hex=" << hex_colors[i].substr(1);
 
             std::ostringstream os;
             os << Url(url.str());
