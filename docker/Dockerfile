@@ -11,6 +11,10 @@ RUN cmake ..
 RUN make -j 4
 RUN ctest --output-on_failure
 
+# build frontend
+WORKDIR /usr/src/project/frontend
+RUN npm install
+RUN npm run build
 
 ### Deploy container ###
 # Define deploy stage
@@ -23,6 +27,7 @@ COPY --from=builder /usr/src/project/server_config .
 
 COPY --from=builder /usr/src/project/files ./files
 
+COPY --from=builder /usr/src/project/frontend ./frontend
 # Expose some port(s)
 EXPOSE 8080
 EXPOSE 80
