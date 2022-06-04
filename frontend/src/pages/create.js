@@ -25,6 +25,11 @@ export function createElementWithClass(tagName, classes) {
   return el;
 }
 
+export function useForceUpdate(){
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value => value + 1); // update the state to force render
+}
+
 export function createItem(color, desc) {
   const elmItem = createElementWithClass("div", "palette_item");
   const elmColor = createElementWithClass("div", "palette_color");
@@ -58,6 +63,8 @@ export const ShowPalette = ({palette}) => {
   });
 }
 
+export let palettes = [];
+
 const CreateHeader = () => {
   const [input_text, setInputText] = useState("");
   const [generated_palettes, updateArray] = useState([]);
@@ -67,7 +74,6 @@ const CreateHeader = () => {
     if(isEmpty) {
       return;
     }
-
     const response = await fetch(CREATE_URL, {
       method: 'POST',
       body: input_text
@@ -80,6 +86,7 @@ const CreateHeader = () => {
       .then(post => {
         setData(JSON.stringify(post));
         updateArray( arr => [...arr, post]);
+        palettes.push(post);
         render_json = true;
       });
 
@@ -104,7 +111,7 @@ const CreateHeader = () => {
               }
         </FormLabel>
       </FormControl>
-      <Button onClick={() => { create_palette()} }>Generate</Button>
+      <Button onClick={() => { create_palette(); } }>Generate</Button>
       <ShowPalette palette={data} />
     </div>
   ); 
@@ -123,6 +130,5 @@ const CreateContainer = () => {
     </div>
   );
 };
-
 
 export default CreateContainer;

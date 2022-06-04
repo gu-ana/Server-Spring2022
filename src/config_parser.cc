@@ -102,18 +102,16 @@ bool NginxConfig::validate_relative_paths()
             {
               continue;
             }
-            if(block_line->child_block_.get() != nullptr &&
-               block_line->child_block_->statements_[0]->tokens_[0] == "root")
+
+            for(const auto& location_line : block_line->child_block_->statements_)
+            {
+              boost::filesystem::path current_path(location_line->tokens_[1]);
+              if(!current_path.is_relative()) 
               {
-                //check to see that the second token is a relative path
-                //if not, we return and not all paths are relative
-                boost::filesystem::path current_path(block_line->child_block_->statements_[0]->tokens_[1]);
-                if(!current_path.is_relative()) 
-                {
                   all_relative_paths = false;
                   return all_relative_paths;
-                }
               }
+            }
           }
         }
       }

@@ -1,10 +1,10 @@
 server {
   listen   80;
-
+  location /echo EchoHandler {
+  }
   location /static/help/ StaticHandler {
     root ./files/images;
   }
-
   location /static/ StaticHandler {
     root ./frontend/build/static;
   }
@@ -14,5 +14,9 @@ server {
   }
   location /api/ ApiHandler {
     data_path ./mnt/;
+  }
+  location /sleep SleepHandler {
+  }
+  location /health HealthHandler {
   }
 }

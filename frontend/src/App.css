@@ -51,6 +51,18 @@ box-sizing: border-box;
 }
 
 
+.listPalette {
+  --n: 5;
+  font-family:sans-serif;
+  display:grid;
+  gap:15px;
+  /* grid-template-columns: repeat(auto-fit, minmax(200px, 100%/var(--n)), 1fr); */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  max-width: 1500px;
+  align-self: center;
+}
+
+
 .palette_color {
   height: 150px;
   position: relative;
