@@ -20,6 +20,9 @@ RUN npm run build
 # Define deploy stage
 FROM ubuntu:focal as deploy
 
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y libcurl4-openssl-dev
+
 # Copy server output binary to "."
 COPY --from=builder /usr/src/project/build/bin/server .
 
