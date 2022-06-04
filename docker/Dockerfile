@@ -21,7 +21,8 @@ RUN npm run build
 FROM ubuntu:focal as deploy
 
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y libcurl4-openssl-dev
+RUN apt-get update && apt-get install -y libcurl4-openssl-dev libcurlpp-dev
+RUN ldconfig -p | grep libcurlpp
 
 # Copy server output binary to "."
 COPY --from=builder /usr/src/project/build/bin/server .

@@ -39,9 +39,13 @@ pkg_check_modules(CURLPP REQUIRED curlpp)
 
 include_directories(include)
 
-# require pthreads
-find_package(Threads REQUIRED)
 
+include(FindCURL)
+# require pthreads and curl
+find_package(Threads REQUIRED)
+find_package(CURL REQUIRED)
+
+include_directories(${CURL_INCLUDE_DIRS})
 # add libraries
 add_library(server_lib src/server.cc)
 add_library(session_lib src/session.cc)

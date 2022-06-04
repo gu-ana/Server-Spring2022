@@ -1,0 +1,19 @@
+.DS_Store
+.vscode
+build
+build_*
+mirror
+logs
+tests/log
+
+# dependencies
+frontend/node_modules
+frontend/.pnp
+.pnp.js
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
