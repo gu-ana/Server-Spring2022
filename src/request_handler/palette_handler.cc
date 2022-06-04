@@ -46,11 +46,10 @@ std::string generate_json_response(std::vector<std::string> colors, std::vector<
     
     // Palette
     jsonResponse << "\"Palette\": {";
-
+    jsonResponse << "\"colors\": [";
     for (int i = 0; i < colors.size(); i++) 
     {
         jsonResponse << "\n";
-        jsonResponse << "\"Color" << i << "\":\n";
         jsonResponse << "{\n";
         jsonResponse << "\"hex\":" << "\"" << colors[i] << "\", ";
         jsonResponse << "\"name\":" << "\"" << colorNames[i] << "\"\n";
@@ -58,6 +57,7 @@ std::string generate_json_response(std::vector<std::string> colors, std::vector<
     }
     // remove trailing comma
     jsonResponse.seekp(-1, jsonResponse.cur);
+    jsonResponse << "]\n";
     jsonResponse << "}\n";
 
     jsonResponse << "}\n";

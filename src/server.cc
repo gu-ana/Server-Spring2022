@@ -14,6 +14,7 @@
 #include "request_handler_factory/health_handler_factory.h"
 #include "request_handler_factory/bad_request_handler_factory.h"
 #include "request_handler_factory/palette_handler_factory.h"
+#include "request_handler_factory/color_handler_factory.h"
 #include "real_file_system.h"
 
 using boost::asio::ip::tcp;
@@ -84,6 +85,9 @@ void Server::create_factory_map()
     // create palette handler factory mapping
     std::shared_ptr<RequestHandlerFactory> palette_factory(new PaletteHandlerFactory());
     routes.insert({"/palette", palette_factory});
+    // create color handler factory mapping
+    std::shared_ptr<RequestHandlerFactory> color_factory(new ColorHandlerFactory());
+    routes.insert({"/color", color_factory});
     // create 404 (error) handler factory
     std::shared_ptr<RequestHandlerFactory> error_factory(new ErrorHandlerFactory());
     routes.insert({"/", error_factory});

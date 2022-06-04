@@ -56,6 +56,7 @@ add_library(sleep_handler_lib src/request_handler/sleep_handler.cc src/request_h
 add_library(health_handler_lib src/request_handler/health_handler.cc src/request_handler/request_handler.cc)
 add_library(bad_request_handler_lib src/request_handler/bad_request_handler.cc src/request_handler/request_handler.cc)
 add_library(palette_handler_lib src/request_handler/palette_handler.cc src/request_handler/request_handler.cc)
+add_library(color_handler_lib src/request_handler/color_handler.cc src/request_handler/request_handler.cc)
 add_library(mime_types_lib src/mime_types.cc)
 add_library(logger_lib src/logger.cc)
 add_library(handler_factory_lib src/request_handler_factory/request_handler_factory.cc)
@@ -67,6 +68,7 @@ add_library(sleep_factory_lib src/request_handler_factory/sleep_handler_factory.
 add_library(health_factory_lib src/request_handler_factory/health_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/health_handler.cc)
 add_library(bad_request_factory_lib src/request_handler_factory/bad_request_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/bad_request_handler.cc)
 add_library(palette_factory_lib src/request_handler_factory/palette_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/palette_handler.cc)
+add_library(color_factory_lib src/request_handler_factory/color_handler_factory.cc src/request_handler/request_handler.cc src/request_handler/color_handler.cc)
 add_library(file_system_lib src/real_file_system.cc src/fake_file_system.cc)
 add_library(palette_api_lib src/palette_api.cc)
 
@@ -74,10 +76,10 @@ add_library(palette_api_lib src/palette_api.cc)
 set(test_libs gtest_main gmock_main) 
 set(logger_libs logger_lib Boost::log_setup Boost::log)
 set(handler_libs request_handler_delegate_lib 
-    echo_handler_lib static_handler_lib api_handler_lib sleep_handler_lib bad_request_handler_lib palette_handler_lib
+    echo_handler_lib static_handler_lib api_handler_lib sleep_handler_lib bad_request_handler_lib palette_handler_lib color_handler_lib
     error_handler_lib health_handler_lib mime_types_lib request_handler_lib file_system_lib)
 set(handler_factory_libs static_factory_lib echo_factory_lib api_factory_lib sleep_factory_lib bad_request_factory_lib
-    error_factory_lib health_factory_lib palette_factory_lib handler_factory_lib file_system_lib)
+    error_factory_lib health_factory_lib palette_factory_lib color_factory_lib handler_factory_lib file_system_lib)
 
 # Link libraries
 target_link_libraries(palette_api_lib ${CURLPP_LDFLAGS} ${logger_libs} Boost::boost)

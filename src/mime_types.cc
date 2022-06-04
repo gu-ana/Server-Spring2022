@@ -16,9 +16,10 @@ struct mapping
   { ".png",  "image/png"   },
   { ".pdf",  "application/pdf"},
   { ".zip",  "application/zip"},
-  { ".js",   "aplication/javascript"},
+  { ".js",   "application/javascript"},
   { ".json", "application/json"},
-  { ".css",  "text/css"}
+  { ".css",  "text/css"},
+  { ".ico", "image/x-icon"}
 
 };
 
